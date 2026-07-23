@@ -126,3 +126,58 @@ CREATE POLICY "Allow owners full access to their own shop"
   USING (auth.uid() = owner_id)
   WITH CHECK (auth.uid() = owner_id);
 
+-- =========================================================================
+-- SUPABASE STORAGE BUCKETS & POLICIES SETUP
+-- Run these queries to set up the storage buckets and active access rules.
+-- =========================================================================
+
+-- 1. Create public storage buckets for owner photos and shop logos
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) 
+VALUES 
+  ('owner-photos', 'owner-photos', true, 2097152, ARRAY['image/jpeg', 'image/png', 'image/webp']),
+  ('shop-logos', 'shop-logos', true, 2097152, ARRAY['image/jpeg', 'image/png', 'image/webp'])
+ON CONFLICT (id) DO NOTHING;
+
+-- 2. Storage Policies for 'owner-photos' bucket
+CREATE POLICY "Allow public read access to owner-photos"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'owner-photos');
+
+CREATE POLICY "Allow authenticated insert access to owner-photos"
+  ON storage.objects FOR INSERT
+  TO authenticated
+  WITH CHECK (bucket_id = 'owner-photos');
+
+CREATE POLICY "Allow authenticated update access to owner-photos"
+  ON storage.objects FOR UPDATE
+  TO authenticated
+  USING (bucket_id = 'owner-photos')
+  WITH CHECK (bucket_id = 'owner-photos');
+
+CREATE POLICY "Allow authenticated delete access to owner-photos"
+  ON storage.objects FOR DELETE
+  TO authenticated
+  USING (bucket_id = 'owner-photos');
+
+-- 3. Storage Policies for 'shop-logos' bucket
+CREATE POLICY "Allow public read access to shop-logos"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'shop-logos');
+
+CREATE POLICY "Allow authenticated insert access to shop-logos"
+  ON storage.objects FOR INSERT
+  TO authenticated
+  WITH CHECK (bucket_id = 'shop-logos');
+
+CREATE POLICY "Allow authenticated update access to shop-logos"
+  ON storage.objects FOR UPDATE
+  TO authenticated
+  USING (bucket_id = 'shop-logos')
+  WITH CHECK (bucket_id = 'shop-logos');
+
+CREATE POLICY "Allow authenticated delete access to shop-logos"
+  ON storage.objects FOR DELETE
+  TO authenticated
+  USING (bucket_id = 'shop-logos');
+
+
