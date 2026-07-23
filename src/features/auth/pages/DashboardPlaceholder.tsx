@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { APP_NAME, APP_VERSION } from '@/constants/env';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { LogOut, CheckCircle2, ChevronRight, Store, User, Mail, ShieldAlert } from 'lucide-react';
 
 export const DashboardPlaceholder: React.FC = () => {
+  const navigate = useNavigate();
   const { user, signOut, loading } = useAuthStore();
 
   const handleLogout = async () => {
@@ -15,8 +17,8 @@ export const DashboardPlaceholder: React.FC = () => {
     }
   };
 
-  const handleNextStep = () => {
-    alert('Congratulations! Phase 1 – Authentication & Foundation is complete. Phase 2 – Shop Registration is up next!');
+  const handleViewProfile = () => {
+    navigate('/shop-profile');
   };
 
   // Extract metadata safely
@@ -112,11 +114,11 @@ export const DashboardPlaceholder: React.FC = () => {
           </div>
 
           <button 
-            onClick={handleNextStep} 
+            onClick={handleViewProfile} 
             className="btn btn-primary" 
             style={styles.nextStepButton}
           >
-            <span>Next Step: Register Your Shop</span>
+            <span>View Shop Profile</span>
             <ChevronRight size={18} />
           </button>
         </div>

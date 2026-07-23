@@ -54,3 +54,75 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Create shops table
+CREATE TABLE IF NOT EXISTS public.shops (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  owner_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL UNIQUE,
+  owner_name TEXT NOT NULL,
+  owner_phone TEXT NOT NULL,
+  owner_photo_url TEXT,
+  owner_photo_path TEXT,
+  
+  -- Shop details
+  shop_name TEXT NOT NULL,
+  shop_code TEXT UNIQUE NOT NULL,
+  shop_logo_url TEXT,
+  shop_logo_path TEXT,
+  business_category TEXT NOT NULL,
+  
+  -- Address
+  door_number TEXT,
+  street TEXT,
+  area TEXT,
+  village_town TEXT NOT NULL,
+  mandal TEXT,
+  district TEXT NOT NULL,
+  state TEXT NOT NULL,
+  pin_code TEXT NOT NULL,
+  country TEXT DEFAULT 'India' NOT NULL,
+  
+  -- Business Details
+  gst TEXT,
+  pan TEXT,
+  upi_id TEXT,
+  business_email TEXT,
+  
+  -- Preferences
+  language TEXT DEFAULT 'en' NOT NULL,
+  currency TEXT DEFAULT 'INR' NOT NULL,
+  theme TEXT DEFAULT 'system' NOT NULL,
+  
+  -- Notifications
+  payment_reminder BOOLEAN DEFAULT true NOT NULL,
+  whatsapp_reminder BOOLEAN DEFAULT true NOT NULL,
+  sms_reminder BOOLEAN DEFAULT false NOT NULL,
+  ai_daily_summary BOOLEAN DEFAULT true NOT NULL,
+  
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Trigger function to automatically update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Drop trigger if it exists, then bind to shops
+DROP TRIGGER IF EXISTS update_shops_updated_at ON public.shops;
+CREATE TRIGGER update_shops_updated_at BEFORE UPDATE ON public.shops
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Enable RLS and setup policy
+ALTER TABLE public.shops ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow owners full access to their own shop" ON public.shops;
+CREATE POLICY "Allow owners full access to their own shop" 
+  ON public.shops FOR ALL 
+  USING (auth.uid() = owner_id)
+  WITH CHECK (auth.uid() = owner_id);
+

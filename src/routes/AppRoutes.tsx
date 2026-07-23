@@ -2,11 +2,14 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { ProtectedRoute } from './ProtectedRoute';
+import { ShopCheckRoute } from './ShopCheckRoute';
 import { Login } from '@/features/auth/pages/Login';
 import { Signup } from '@/features/auth/pages/Signup';
 import { ForgotPassword } from '@/features/auth/pages/ForgotPassword';
 import { Splash } from '@/features/auth/pages/Splash';
 import { DashboardPlaceholder } from '@/features/auth/pages/DashboardPlaceholder';
+import { RegisterShop } from '@/features/shop/pages/RegisterShop';
+import { ShopProfile } from '@/features/shop/pages/ShopProfile';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 
 export const AppRoutes: React.FC = () => {
@@ -35,8 +38,17 @@ export const AppRoutes: React.FC = () => {
 
       {/* Protected Pages */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<DashboardPlaceholder />} />
-        <Route path="/dashboard" element={<DashboardPlaceholder />} />
+        {/* Guard for registered shops */}
+        <Route element={<ShopCheckRoute />}>
+          <Route path="/" element={<DashboardPlaceholder />} />
+          <Route path="/dashboard" element={<DashboardPlaceholder />} />
+          <Route path="/shop-profile" element={<ShopProfile />} />
+        </Route>
+        
+        {/* Guard for registering a shop (shop must NOT exist yet) */}
+        <Route element={<ShopCheckRoute />}>
+          <Route path="/register-shop" element={<RegisterShop />} />
+        </Route>
       </Route>
 
       {/* Catch All Redirect */}
