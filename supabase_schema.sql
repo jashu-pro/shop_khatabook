@@ -185,4 +185,65 @@ CREATE POLICY "Allow authenticated delete access to shop-logos"
   ON storage.objects FOR DELETE
   USING (bucket_id = 'shop-logos');
 
+-- =========================================================================
+-- CUSTOMERS SCHEMA & POLICIES SETUP
+-- =========================================================================
+
+-- Create customers table
+CREATE TABLE IF NOT EXISTS public.customers (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  shop_id UUID REFERENCES public.shops(id) ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  phone TEXT,
+  photo_url TEXT,
+  photo_path TEXT,
+  village TEXT,
+  address TEXT,
+  notes TEXT,
+  credit_limit NUMERIC DEFAULT 0 NOT NULL,
+  
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  
+  -- Prevent duplicate customer phone numbers within the same shop (allows multiple nulls/empty)
+  CONSTRAINT unique_shop_customer_phone UNIQUE (shop_id, phone)
+);
+
+-- Trigger function to automatically update updated_at timestamp on edit
+DROP TRIGGER IF EXISTS update_customers_updated_at ON public.customers;
+CREATE TRIGGER update_customers_updated_at BEFORE UPDATE ON public.customers
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Enable RLS and setup policies
+ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow owners access to their own shop's customers" ON public.customers;
+CREATE POLICY "Allow owners access to their own shop's customers"
+  ON public.customers FOR ALL
+  USING (shop_id IN (SELECT id FROM public.shops WHERE owner_id = auth.uid()))
+  WITH CHECK (shop_id IN (SELECT id FROM public.shops WHERE owner_id = auth.uid()));
+
+-- Create public storage bucket for customer-photos
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) 
+VALUES ('customer-photos', 'customer-photos', true, 2097152, ARRAY['image/jpeg', 'image/png', 'image/webp'])
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage Policies for 'customer-photos' bucket
+DROP POLICY IF EXISTS "Allow public read access to customer-photos" ON storage.objects;
+CREATE POLICY "Allow public read access to customer-photos"
+  ON storage.objects FOR SELECT USING (bucket_id = 'customer-photos');
+
+DROP POLICY IF EXISTS "Allow authenticated insert access to customer-photos" ON storage.objects;
+CREATE POLICY "Allow authenticated insert access to customer-photos"
+  ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'customer-photos');
+
+DROP POLICY IF EXISTS "Allow authenticated update access to customer-photos" ON storage.objects;
+CREATE POLICY "Allow authenticated update access to customer-photos"
+  ON storage.objects FOR UPDATE USING (bucket_id = 'customer-photos') WITH CHECK (bucket_id = 'customer-photos');
+
+DROP POLICY IF EXISTS "Allow authenticated delete access to customer-photos" ON storage.objects;
+CREATE POLICY "Allow authenticated delete access to customer-photos"
+  ON storage.objects FOR DELETE USING (bucket_id = 'customer-photos');
+
+
 

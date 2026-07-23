@@ -31,7 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onComingSoonAlert }) => {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
-    { id: 'customers', label: 'Customers', icon: <Users size={20} />, path: '/customers', future: true },
+    { id: 'customers', label: 'Customers', icon: <Users size={20} />, path: '/customers' },
     { id: 'sales', label: 'Sales Feed', icon: <ShoppingBag size={20} />, path: '/sales', future: true },
     { id: 'payments', label: 'Payments', icon: <CircleDollarSign size={20} />, path: '/payments', future: true },
     { id: 'ledger', label: 'Digital Ledger', icon: <BookOpen size={20} />, path: '/ledger', future: true },
