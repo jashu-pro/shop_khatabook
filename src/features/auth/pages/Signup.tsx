@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { APP_NAME } from '@/constants/env';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
-import { User, Mail, Lock, Phone, Eye, EyeOff, Loader2, AlertCircle, BookOpen } from 'lucide-react';
+import { User, Mail, Lock, Phone, Eye, EyeOff, Loader2, AlertCircle, BookOpen, Camera } from 'lucide-react';
 
 export const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ export const Signup: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -54,7 +55,7 @@ export const Signup: React.FC = () => {
     }
 
     try {
-      await signUp(email.trim(), password, fullName.trim(), phone.trim());
+      await signUp(email.trim(), password, fullName.trim(), phone.trim(), avatarUrl.trim());
       navigate('/', { replace: true });
     } catch (err: any) {
       // Handled by store
@@ -124,6 +125,39 @@ export const Signup: React.FC = () => {
                 disabled={loading}
                 autoComplete="tel"
               />
+            </div>
+          </div>
+
+          <div className="input-group">
+            <label className="input-label" htmlFor="signup-avatar">Avatar Image URL</label>
+            <div style={styles.inputWrapper}>
+              <Camera size={18} style={styles.inputIcon} />
+              <input
+                id="signup-avatar"
+                type="url"
+                placeholder="https://example.com/avatar.jpg"
+                className="input-field"
+                style={{ paddingLeft: '44px', paddingRight: avatarUrl.trim() ? '50px' : '16px' }}
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                disabled={loading}
+              />
+              {avatarUrl.trim() && (
+                <img 
+                  src={avatarUrl.trim()} 
+                  alt="Avatar Preview" 
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '1px solid var(--border-color)',
+                  }}
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                />
+              )}
             </div>
           </div>
 

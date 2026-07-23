@@ -12,7 +12,7 @@ interface AuthState {
   // Actions
   initializeAuth: () => () => void; // Returns unsubscribe function
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, phoneNumber?: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, phoneNumber?: string, avatarUrl?: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -85,10 +85,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  signUp: async (email, password, fullName, phoneNumber) => {
+  signUp: async (email, password, fullName, phoneNumber, avatarUrl) => {
     set({ loading: true, error: null });
     try {
-      const { data, error } = await authService.signUp(email, password, fullName, phoneNumber);
+      const { data, error } = await authService.signUp(email, password, fullName, phoneNumber, avatarUrl);
       if (error) throw error;
       set({ 
         session: data.session, 

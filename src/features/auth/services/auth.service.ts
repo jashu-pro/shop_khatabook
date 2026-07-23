@@ -11,7 +11,7 @@ export const authService = {
   /**
    * Register a new user with email, password, and metadata
    */
-  async signUp(email: string, password: string, fullName: string, phoneNumber?: string): Promise<AuthResponse> {
+  async signUp(email: string, password: string, fullName: string, phoneNumber?: string, avatarUrl?: string): Promise<AuthResponse> {
     if (!IS_ENV_VALID) throw new Error('Supabase is not configured.');
     return await supabase.auth.signUp({
       email,
@@ -20,6 +20,7 @@ export const authService = {
         data: {
           full_name: fullName,
           phone_number: phoneNumber || '',
+          avatar_url: avatarUrl || '',
         },
       },
     });
