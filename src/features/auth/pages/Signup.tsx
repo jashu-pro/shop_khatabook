@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { APP_NAME } from '@/constants/env';
@@ -18,12 +18,21 @@ export const Signup: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Clean errors
+  // Camera states and refs
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  // Clean errors and camera tracks on unmount
   useEffect(() => {
     clearError();
     setFormError(null);
     return () => {
       clearError();
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
     };
   }, [clearError]);
 
@@ -33,6 +42,61 @@ export const Signup: React.FC = () => {
       navigate('/', { replace: true });
     }
   }, [user, navigate]);
+
+  const startCamera = async () => {
+    setCameraError(null);
+    setIsCameraOpen(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 300, height: 300, facingMode: 'user' },
+        audio: false,
+      });
+      streamRef.current = stream;
+      // Use a brief timeout to let video mount and register videoRef
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      }, 50);
+    } catch (err: any) {
+      console.error('Camera access error:', err);
+      setCameraError('Could not access camera. Please check permissions.');
+      setIsCameraOpen(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setIsCameraOpen(false);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current) {
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      canvas.width = 200;
+      canvas.height = 200;
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const size = Math.min(video.videoWidth, video.videoHeight);
+        const sx = (video.videoWidth - size) / 2;
+        const sy = (video.videoHeight - size) / 2;
+        ctx.drawImage(video, sx, sy, size, size, 0, 0, 200, 200);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setAvatarUrl(dataUrl);
+      }
+      stopCamera();
+    }
+  };
+
+  const removePhoto = () => {
+    setAvatarUrl('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,6 +155,89 @@ export const Signup: React.FC = () => {
         )}
 
         <form onSubmit={handleSubmit} style={styles.form}>
+          {/* Avatar Photo Section */}
+          <div style={styles.avatarSection}>
+            <div style={styles.avatarCircle}>
+              {isCameraOpen ? (
+                <video 
+                  ref={videoRef} 
+                  autoPlay 
+                  playsInline 
+                  muted
+                  style={styles.videoStream}
+                />
+              ) : avatarUrl ? (
+                <img 
+                  src={avatarUrl} 
+                  alt="Captured Profile" 
+                  style={styles.avatarImage} 
+                />
+              ) : (
+                <div style={styles.avatarPlaceholder}>
+                  <User size={40} style={{ color: 'var(--text-muted)' }} />
+                </div>
+              )}
+            </div>
+
+            {cameraError && (
+              <p style={{ fontSize: '0.8rem', color: 'var(--danger)', marginTop: '4px', textAlign: 'center' }}>
+                {cameraError}
+              </p>
+            )}
+
+            <div style={styles.avatarActionRow}>
+              {isCameraOpen ? (
+                <>
+                  <button 
+                    type="button" 
+                    onClick={capturePhoto} 
+                    className="btn btn-primary"
+                    style={styles.avatarBtn}
+                  >
+                    Capture
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={stopCamera} 
+                    className="btn btn-secondary"
+                    style={styles.avatarBtn}
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : avatarUrl ? (
+                <>
+                  <button 
+                    type="button" 
+                    onClick={startCamera} 
+                    className="btn btn-secondary"
+                    style={styles.avatarBtn}
+                  >
+                    Retake
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={removePhoto} 
+                    className="btn btn-outline"
+                    style={{ ...styles.avatarBtn, color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                  >
+                    Remove
+                  </button>
+                </>
+              ) : (
+                <button 
+                  type="button" 
+                  onClick={startCamera} 
+                  className="btn btn-secondary"
+                  style={styles.openCameraBtn}
+                >
+                  <Camera size={16} />
+                  <span>Take Owner Photo</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="input-group">
             <label className="input-label" htmlFor="signup-fullname">Full Name *</label>
             <div style={styles.inputWrapper}>
@@ -125,39 +272,6 @@ export const Signup: React.FC = () => {
                 disabled={loading}
                 autoComplete="tel"
               />
-            </div>
-          </div>
-
-          <div className="input-group">
-            <label className="input-label" htmlFor="signup-avatar">Avatar Image URL</label>
-            <div style={styles.inputWrapper}>
-              <Camera size={18} style={styles.inputIcon} />
-              <input
-                id="signup-avatar"
-                type="url"
-                placeholder="https://example.com/avatar.jpg"
-                className="input-field"
-                style={{ paddingLeft: '44px', paddingRight: avatarUrl.trim() ? '50px' : '16px' }}
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                disabled={loading}
-              />
-              {avatarUrl.trim() && (
-                <img 
-                  src={avatarUrl.trim()} 
-                  alt="Avatar Preview" 
-                  style={{
-                    position: 'absolute',
-                    right: '12px',
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: '1px solid var(--border-color)',
-                  }}
-                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                />
-              )}
             </div>
           </div>
 
@@ -357,5 +471,61 @@ const styles = {
   loginLink: {
     fontWeight: '600',
     color: 'var(--primary)',
+  } as React.CSSProperties,
+  avatarSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    marginBottom: '8px',
+  } as React.CSSProperties,
+  avatarCircle: {
+    width: '100px',
+    height: '100px',
+    borderRadius: '50%',
+    backgroundColor: 'var(--bg-tertiary)',
+    border: '2px solid var(--border-color)',
+    position: 'relative',
+    overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: 'var(--shadow-md)',
+  } as React.CSSProperties,
+  videoStream: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    transform: 'scaleX(-1)',
+  } as React.CSSProperties,
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  } as React.CSSProperties,
+  avatarPlaceholder: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  } as React.CSSProperties,
+  avatarActionRow: {
+    display: 'flex',
+    gap: '8px',
+    justifyContent: 'center',
+    width: '100%',
+  } as React.CSSProperties,
+  avatarBtn: {
+    padding: '6px 12px',
+    fontSize: '0.8rem',
+    borderRadius: 'var(--radius-sm)',
+  } as React.CSSProperties,
+  openCameraBtn: {
+    padding: '8px 16px',
+    fontSize: '0.85rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    borderRadius: 'var(--radius-md)',
   } as React.CSSProperties,
 };
