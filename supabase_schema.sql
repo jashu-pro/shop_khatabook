@@ -150,20 +150,17 @@ CREATE POLICY "Allow public read access to owner-photos"
 DROP POLICY IF EXISTS "Allow authenticated insert access to owner-photos" ON storage.objects;
 CREATE POLICY "Allow authenticated insert access to owner-photos"
   ON storage.objects FOR INSERT
-  TO authenticated
   WITH CHECK (bucket_id = 'owner-photos');
 
 DROP POLICY IF EXISTS "Allow authenticated update access to owner-photos" ON storage.objects;
 CREATE POLICY "Allow authenticated update access to owner-photos"
   ON storage.objects FOR UPDATE
-  TO authenticated
   USING (bucket_id = 'owner-photos')
   WITH CHECK (bucket_id = 'owner-photos');
 
 DROP POLICY IF EXISTS "Allow authenticated delete access to owner-photos" ON storage.objects;
 CREATE POLICY "Allow authenticated delete access to owner-photos"
   ON storage.objects FOR DELETE
-  TO authenticated
   USING (bucket_id = 'owner-photos');
 
 -- 3. Storage Policies for 'shop-logos' bucket
@@ -175,20 +172,17 @@ CREATE POLICY "Allow public read access to shop-logos"
 DROP POLICY IF EXISTS "Allow authenticated insert access to shop-logos" ON storage.objects;
 CREATE POLICY "Allow authenticated insert access to shop-logos"
   ON storage.objects FOR INSERT
-  TO authenticated
   WITH CHECK (bucket_id = 'shop-logos');
 
 DROP POLICY IF EXISTS "Allow authenticated update access to shop-logos" ON storage.objects;
 CREATE POLICY "Allow authenticated update access to shop-logos"
   ON storage.objects FOR UPDATE
-  TO authenticated
   USING (bucket_id = 'shop-logos')
   WITH CHECK (bucket_id = 'shop-logos');
 
 DROP POLICY IF EXISTS "Allow authenticated delete access to shop-logos" ON storage.objects;
 CREATE POLICY "Allow authenticated delete access to shop-logos"
   ON storage.objects FOR DELETE
-  TO authenticated
   USING (bucket_id = 'shop-logos');
 
 
