@@ -13,15 +13,18 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for profiles
+DROP POLICY IF EXISTS "Allow public read access to profiles" ON public.profiles;
 CREATE POLICY "Allow public read access to profiles" 
   ON public.profiles FOR SELECT 
   USING (true);
 
+DROP POLICY IF EXISTS "Allow users to update their own profile" ON public.profiles;
 CREATE POLICY "Allow users to update their own profile" 
   ON public.profiles FOR UPDATE 
   USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Allow users to insert their own profile" ON public.profiles;
 CREATE POLICY "Allow users to insert their own profile" 
   ON public.profiles FOR INSERT 
   WITH CHECK (auth.uid() = id);
@@ -139,42 +142,50 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Storage Policies for 'owner-photos' bucket
+DROP POLICY IF EXISTS "Allow public read access to owner-photos" ON storage.objects;
 CREATE POLICY "Allow public read access to owner-photos"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'owner-photos');
 
+DROP POLICY IF EXISTS "Allow authenticated insert access to owner-photos" ON storage.objects;
 CREATE POLICY "Allow authenticated insert access to owner-photos"
   ON storage.objects FOR INSERT
   TO authenticated
   WITH CHECK (bucket_id = 'owner-photos');
 
+DROP POLICY IF EXISTS "Allow authenticated update access to owner-photos" ON storage.objects;
 CREATE POLICY "Allow authenticated update access to owner-photos"
   ON storage.objects FOR UPDATE
   TO authenticated
   USING (bucket_id = 'owner-photos')
   WITH CHECK (bucket_id = 'owner-photos');
 
+DROP POLICY IF EXISTS "Allow authenticated delete access to owner-photos" ON storage.objects;
 CREATE POLICY "Allow authenticated delete access to owner-photos"
   ON storage.objects FOR DELETE
   TO authenticated
   USING (bucket_id = 'owner-photos');
 
 -- 3. Storage Policies for 'shop-logos' bucket
+DROP POLICY IF EXISTS "Allow public read access to shop-logos" ON storage.objects;
 CREATE POLICY "Allow public read access to shop-logos"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'shop-logos');
 
+DROP POLICY IF EXISTS "Allow authenticated insert access to shop-logos" ON storage.objects;
 CREATE POLICY "Allow authenticated insert access to shop-logos"
   ON storage.objects FOR INSERT
   TO authenticated
   WITH CHECK (bucket_id = 'shop-logos');
 
+DROP POLICY IF EXISTS "Allow authenticated update access to shop-logos" ON storage.objects;
 CREATE POLICY "Allow authenticated update access to shop-logos"
   ON storage.objects FOR UPDATE
   TO authenticated
   USING (bucket_id = 'shop-logos')
   WITH CHECK (bucket_id = 'shop-logos');
 
+DROP POLICY IF EXISTS "Allow authenticated delete access to shop-logos" ON storage.objects;
 CREATE POLICY "Allow authenticated delete access to shop-logos"
   ON storage.objects FOR DELETE
   TO authenticated
