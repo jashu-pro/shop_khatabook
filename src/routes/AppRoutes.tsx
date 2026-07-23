@@ -12,6 +12,7 @@ import { RegisterShop } from '@/features/shop/pages/RegisterShop';
 import { ShopProfile } from '@/features/shop/pages/ShopProfile';
 import { CustomerList } from '@/features/customers/pages/CustomerList';
 import { CustomerDetail } from '@/features/customers/pages/CustomerDetail';
+import { SalesList } from '@/features/sales/pages/SalesList';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 
 export const AppRoutes: React.FC = () => {
@@ -47,6 +48,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/shop-profile" element={<ShopProfile />} />
           <Route path="/customers" element={<CustomerList />} />
           <Route path="/customers/:customerId" element={<CustomerDetail />} />
+          <Route path="/sales" element={<SalesList />} />
         </Route>
         
         {/* Guard for registering a shop (shop must NOT exist yet) */}

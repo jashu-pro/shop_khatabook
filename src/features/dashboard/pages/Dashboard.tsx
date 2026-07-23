@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useShopQuery } from '@/features/shop/hooks/useShop';
 import { Sidebar } from '../components/Sidebar';
 import { TopBar } from '../components/TopBar';
 import { WelcomeCard } from '../components/WelcomeCard';
@@ -12,19 +14,49 @@ import {
   useWeeklySalesQuery, 
   useRecentActivitiesQuery 
 } from '../hooks/useDashboard';
+import { useCreateSaleMutation } from '@/features/sales/hooks/useSales';
+import { RecordSaleForm } from '@/features/sales/components/RecordSaleForm';
 import { Sparkles, Info, X } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { data: shop } = useShopQuery(user?.id);
+  
   const [alertInfo, setAlertInfo] = useState<string | null>(null);
+  const [isRecordSaleOpen, setIsRecordSaleOpen] = useState(false);
 
-  // Queries
+  // Queries & Mutations
   const { data: metrics, isLoading: isMetricsLoading } = useDashboardMetricsQuery(user?.id);
   const { data: sales, isLoading: isSalesLoading } = useWeeklySalesQuery(user?.id);
   const { data: activities, isLoading: isActivitiesLoading } = useRecentActivitiesQuery(user?.id);
+  const createSaleMutation = useCreateSaleMutation();
 
   const handleComingSoonAlert = (featureName: string) => {
     setAlertInfo(featureName);
+  };
+
+  const handleQuickActionClick = (actionId: string) => {
+    if (actionId === 'add_customer') {
+      navigate('/customers');
+    } else if (actionId === 'record_sale') {
+      setIsRecordSaleOpen(true);
+    } else if (actionId === 'receive_payment') {
+      // Pre-work/Coming soon for payments trigger
+      setAlertInfo('Receive Payment');
+    } else if (actionId === 'view_ledger') {
+      // Ledger route coming soon or customers route
+      navigate('/customers');
+    }
+  };
+
+  const handleSaveSale = async (payload: any) => {
+    if (!shop?.id) return;
+    await createSaleMutation.mutateAsync({
+      shop_id: shop.id,
+      ...payload,
+    });
+    setIsRecordSaleOpen(false);
   };
 
   return (
@@ -71,9 +103,19 @@ export const Dashboard: React.FC = () => {
           </div>
 
           {/* Row 4: Shortcuts Operations */}
-          <QuickActions onComingSoonAlert={handleComingSoonAlert} />
+          <QuickActions onComingSoonAlert={handleComingSoonAlert} onActionClick={handleQuickActionClick} />
         </div>
       </div>
+
+      {/* Record Sale Modal */}
+      {isRecordSaleOpen && shop?.id && (
+        <RecordSaleForm
+          shopId={shop.id}
+          onClose={() => setIsRecordSaleOpen(false)}
+          onSave={handleSaveSale}
+          isSubmitting={createSaleMutation.isPending}
+        />
+      )}
     </div>
   );
 };

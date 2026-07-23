@@ -3,9 +3,10 @@ import { UserPlus, PlusCircle, CircleDollarSign, BookOpen } from 'lucide-react';
 
 interface QuickActionsProps {
   onComingSoonAlert: (feature: string) => void;
+  onActionClick?: (actionId: string) => void;
 }
 
-export const QuickActions: React.FC<QuickActionsProps> = ({ onComingSoonAlert }) => {
+export const QuickActions: React.FC<QuickActionsProps> = ({ onComingSoonAlert, onActionClick }) => {
   const actions = [
     {
       id: 'add_customer',
@@ -45,6 +46,14 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ onComingSoonAlert })
     },
   ];
 
+  const handleAction = (act: typeof actions[0]) => {
+    if (onActionClick) {
+      onActionClick(act.id);
+    } else {
+      onComingSoonAlert(act.label);
+    }
+  };
+
   return (
     <div style={styles.container} className="glass-panel animate-fade-in">
       <h3 style={styles.title}>Quick Operations</h3>
@@ -53,7 +62,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ onComingSoonAlert })
         {actions.map((act) => (
           <button
             key={act.id}
-            onClick={() => onComingSoonAlert(act.label)}
+            onClick={() => handleAction(act)}
             style={{
               ...styles.btn,
               backgroundColor: act.bgColor,

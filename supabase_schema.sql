@@ -245,5 +245,95 @@ DROP POLICY IF EXISTS "Allow authenticated delete access to customer-photos" ON 
 CREATE POLICY "Allow authenticated delete access to customer-photos"
   ON storage.objects FOR DELETE USING (bucket_id = 'customer-photos');
 
+-- =========================================================================
+-- SALES & PAYMENTS SCHEMA SETUP
+-- =========================================================================
+
+-- Create sales table
+CREATE TABLE IF NOT EXISTS public.sales (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  shop_id UUID REFERENCES public.shops(id) ON DELETE CASCADE NOT NULL,
+  customer_id UUID REFERENCES public.customers(id) ON DELETE CASCADE NOT NULL,
+  sale_number TEXT NOT NULL,
+  sale_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  total_amount NUMERIC NOT NULL CHECK (total_amount > 0),
+  notes TEXT,
+  bill_photo_url TEXT,
+  bill_photo_path TEXT,
+  
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Create payments table (Pre-work for Phase 6)
+CREATE TABLE IF NOT EXISTS public.payments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  shop_id UUID REFERENCES public.shops(id) ON DELETE CASCADE NOT NULL,
+  customer_id UUID REFERENCES public.customers(id) ON DELETE CASCADE NOT NULL,
+  payment_amount NUMERIC NOT NULL CHECK (payment_amount > 0),
+  payment_method TEXT DEFAULT 'cash' NOT NULL, -- cash, upi, bank_transfer
+  payment_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  notes TEXT,
+  
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Trigger functions to automatically update updated_at timestamps
+DROP TRIGGER IF EXISTS update_sales_updated_at ON public.sales;
+CREATE TRIGGER update_sales_updated_at BEFORE UPDATE ON public.sales
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_payments_updated_at ON public.payments;
+CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON public.payments
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Database Indexes for high performance searches and joins
+CREATE INDEX IF NOT EXISTS idx_sales_customer_id ON public.sales(customer_id);
+CREATE INDEX IF NOT EXISTS idx_sales_shop_id ON public.sales(shop_id);
+CREATE INDEX IF NOT EXISTS idx_sales_sale_date ON public.sales(sale_date);
+
+CREATE INDEX IF NOT EXISTS idx_payments_customer_id ON public.payments(customer_id);
+CREATE INDEX IF NOT EXISTS idx_payments_shop_id ON public.payments(shop_id);
+CREATE INDEX IF NOT EXISTS idx_payments_payment_date ON public.payments(payment_date);
+
+-- Enable RLS and setup policies
+ALTER TABLE public.sales ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow owners access to their own shop's sales" ON public.sales;
+CREATE POLICY "Allow owners access to their own shop's sales"
+  ON public.sales FOR ALL
+  USING (shop_id IN (SELECT id FROM public.shops WHERE owner_id = auth.uid()))
+  WITH CHECK (shop_id IN (SELECT id FROM public.shops WHERE owner_id = auth.uid()));
+
+DROP POLICY IF EXISTS "Allow owners access to their own shop's payments" ON public.payments;
+CREATE POLICY "Allow owners access to their own shop's payments"
+  ON public.payments FOR ALL
+  USING (shop_id IN (SELECT id FROM public.shops WHERE owner_id = auth.uid()))
+  WITH CHECK (shop_id IN (SELECT id FROM public.shops WHERE owner_id = auth.uid()));
+
+-- Storage Bucket Policies for 'bill-attachments' (public bucket for bills pictures)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) 
+VALUES ('bill-attachments', 'bill-attachments', true, 3145728, ARRAY['image/jpeg', 'image/png', 'image/webp'])
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Allow public read access to bill-attachments" ON storage.objects;
+CREATE POLICY "Allow public read access to bill-attachments"
+  ON storage.objects FOR SELECT USING (bucket_id = 'bill-attachments');
+
+DROP POLICY IF EXISTS "Allow authenticated insert access to bill-attachments" ON storage.objects;
+CREATE POLICY "Allow authenticated insert access to bill-attachments"
+  ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'bill-attachments');
+
+DROP POLICY IF EXISTS "Allow authenticated update access to bill-attachments" ON storage.objects;
+CREATE POLICY "Allow authenticated update access to bill-attachments"
+  ON storage.objects FOR UPDATE USING (bucket_id = 'bill-attachments') WITH CHECK (bucket_id = 'bill-attachments');
+
+DROP POLICY IF EXISTS "Allow authenticated delete access to bill-attachments" ON storage.objects;
+CREATE POLICY "Allow authenticated delete access to bill-attachments"
+  ON storage.objects FOR DELETE USING (bucket_id = 'bill-attachments');
+
+
 
 

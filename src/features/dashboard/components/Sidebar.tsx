@@ -32,7 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onComingSoonAlert }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
     { id: 'customers', label: 'Customers', icon: <Users size={20} />, path: '/customers' },
-    { id: 'sales', label: 'Sales Feed', icon: <ShoppingBag size={20} />, path: '/sales', future: true },
+    { id: 'sales', label: 'Sales Feed', icon: <ShoppingBag size={20} />, path: '/sales' },
     { id: 'payments', label: 'Payments', icon: <CircleDollarSign size={20} />, path: '/payments', future: true },
     { id: 'ledger', label: 'Digital Ledger', icon: <BookOpen size={20} />, path: '/ledger', future: true },
     { id: 'reports', label: 'Reports', icon: <BarChart3 size={20} />, path: '/reports', future: true },
