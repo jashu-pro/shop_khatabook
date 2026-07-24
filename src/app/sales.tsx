@@ -1,44 +1,40 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  ScrollView, 
-  FlatList, 
-  TouchableOpacity, 
-  Alert, 
-  Image, 
-  Modal, 
-  ActivityIndicator 
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  Image,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
-import { 
-  Text, 
-  Surface, 
-  Searchbar, 
-  FAB, 
-  Portal, 
-  IconButton, 
-  useTheme, 
+import {
+  Text,
+  Surface,
+  Searchbar,
+  FAB,
+  Portal,
+  IconButton,
+  useTheme,
   Card,
-  Avatar 
+  Avatar,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/authStore';
 import { useShopQuery } from '../hooks/useShop';
-import { 
-  useSalesQuery, 
-  useCreateSaleMutation, 
-  useDeleteSaleMutation 
-} from '../hooks/useSales';
+import { useSalesQuery, useCreateSaleMutation, useDeleteSaleMutation } from '../hooks/useSales';
 import { RecordSaleForm } from '../components/RecordSaleForm';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Trash2, 
-  FileImage, 
-  ShoppingBag, 
-  Search, 
-  Plus, 
-  X 
+import {
+  ArrowLeft,
+  Calendar,
+  Trash2,
+  FileImage,
+  ShoppingBag,
+  Search,
+  Plus,
+  X,
 } from 'lucide-react-native';
 import { router } from 'expo-router';
 
@@ -72,16 +68,21 @@ export default function SalesListScreen() {
     Alert.alert('Success', 'Credit sale transaction logged successfully.');
   };
 
-  const handleDeleteSale = (saleId: string, customerId: string, customerName: string, amount: number) => {
+  const handleDeleteSale = (
+    saleId: string,
+    customerId: string,
+    customerName: string,
+    amount: number
+  ) => {
     if (!shop?.id) return;
-    
+
     Alert.alert(
       'Delete Transaction',
       `Are you sure you want to delete this credit sale of ₹${formatAmount(amount)} for ${customerName}?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
+        {
+          text: 'Delete',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -94,19 +95,19 @@ export default function SalesListScreen() {
             } catch (err: any) {
               Alert.alert('Error', err.message || 'Failed to delete transaction.');
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
 
   // Filter logic
-  const filteredSales = sales.filter(sale => {
+  const filteredSales = sales.filter((sale) => {
     // Text search
     const customerName = sale.customers?.name || '';
     const notes = sale.notes || '';
     const saleNum = sale.sale_number || '';
-    const matchesText = 
+    const matchesText =
       customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       notes.toLowerCase().includes(searchQuery.toLowerCase()) ||
       saleNum.toLowerCase().includes(searchQuery.toLowerCase());
@@ -114,7 +115,7 @@ export default function SalesListScreen() {
     // Date filters
     const saleDate = new Date(sale.sale_date);
     const today = new Date();
-    
+
     let matchesDate = true;
     if (dateFilter === 'today') {
       matchesDate = saleDate.toDateString() === today.toDateString();
@@ -135,14 +136,14 @@ export default function SalesListScreen() {
     <SafeAreaView style={styles.container}>
       {/* Top Header */}
       <Surface style={styles.header} elevation={1}>
-        <IconButton 
-          icon={() => <ArrowLeft size={20} color={theme.colors.onSurface} />} 
+        <IconButton
+          icon={() => <ArrowLeft size={20} color={theme.colors.onSurface} />}
           onPress={() => router.back()}
         />
         <Text style={styles.headerTitle}>Credit Sales Feed</Text>
-        <IconButton 
-          icon="plus" 
-          iconColor={theme.colors.primary} 
+        <IconButton
+          icon="plus"
+          iconColor={theme.colors.primary}
           onPress={() => setIsFormOpen(true)}
         />
       </Surface>
@@ -157,25 +158,31 @@ export default function SalesListScreen() {
           inputStyle={styles.searchbarInput}
         />
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateFiltersRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.dateFiltersRow}
+        >
           {[
             { id: 'all', label: 'All Time' },
             { id: 'today', label: 'Today' },
             { id: 'yesterday', label: 'Yesterday' },
             { id: '7days', label: 'Last 7 Days' },
-          ].map(btn => (
+          ].map((btn) => (
             <TouchableOpacity
               key={btn.id}
               onPress={() => setDateFilter(btn.id as any)}
               style={[
                 styles.filterBadge,
-                dateFilter === btn.id && { backgroundColor: theme.colors.primary }
+                dateFilter === btn.id && { backgroundColor: theme.colors.primary },
               ]}
             >
-              <Text style={[
-                styles.filterBadgeText,
-                dateFilter === btn.id && { color: theme.colors.onPrimary, fontWeight: '700' }
-              ]}>
+              <Text
+                style={[
+                  styles.filterBadgeText,
+                  dateFilter === btn.id && { color: theme.colors.onPrimary, fontWeight: '700' },
+                ]}
+              >
                 {btn.label}
               </Text>
             </TouchableOpacity>
@@ -194,13 +201,14 @@ export default function SalesListScreen() {
           <ShoppingBag size={48} color="#94a3b8" />
           <Text style={styles.emptyTitle}>No credit sales logged</Text>
           <Text style={styles.emptyDesc}>
-            No entries match your search filters. Click the "+" button below to log a sale.
+            No entries match your search filters. Click the &quot;+&quot; button below to log a
+            sale.
           </Text>
         </View>
       ) : (
         <FlatList
           data={filteredSales}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
             <Card style={styles.saleCard} elevation={1}>
@@ -215,7 +223,9 @@ export default function SalesListScreen() {
 
                 <View style={styles.detailsCol}>
                   <View style={styles.cardHeaderRow}>
-                    <Text style={styles.customerName}>{item.customers?.name || 'Deleted customer'}</Text>
+                    <Text style={styles.customerName}>
+                      {item.customers?.name || 'Deleted customer'}
+                    </Text>
                     <Text style={styles.amountText}>₹{formatAmount(item.total_amount)}</Text>
                   </View>
 
@@ -230,21 +240,28 @@ export default function SalesListScreen() {
                         day: '2-digit',
                         month: 'short',
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
                       })}
                     </Text>
 
                     <View style={styles.actionButtons}>
                       {item.bill_photo_url && (
-                        <IconButton 
+                        <IconButton
                           icon={() => <FileImage size={16} color={theme.colors.primary} />}
                           onPress={() => setActiveBillUrl(item.bill_photo_url)}
                           style={styles.actionIconButton}
                         />
                       )}
-                      <IconButton 
+                      <IconButton
                         icon={() => <Trash2 size={16} color={theme.colors.error} />}
-                        onPress={() => handleDeleteSale(item.id, item.customer_id, item.customers?.name || 'Debtor', item.total_amount)}
+                        onPress={() =>
+                          handleDeleteSale(
+                            item.id,
+                            item.customer_id,
+                            item.customers?.name || 'Debtor',
+                            item.total_amount
+                          )
+                        }
                         style={styles.actionIconButton}
                       />
                     </View>
@@ -269,15 +286,15 @@ export default function SalesListScreen() {
         <Modal visible={true} transparent={true} animationType="fade">
           <View style={styles.lightboxBackdrop}>
             <View style={styles.lightboxContent}>
-              <IconButton 
-                icon={() => <X size={24} color="#fff" />} 
+              <IconButton
+                icon={() => <X size={24} color="#fff" />}
                 style={styles.lightboxClose}
                 onPress={() => setActiveBillUrl(null)}
               />
-              <Image 
-                source={{ uri: activeBillUrl }} 
-                style={styles.lightboxImage} 
-                resizeMode="contain" 
+              <Image
+                source={{ uri: activeBillUrl }}
+                style={styles.lightboxImage}
+                resizeMode="contain"
               />
             </View>
           </View>

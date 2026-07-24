@@ -9,7 +9,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const { signIn, loading, error, clearError } = useAuthStore();
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
@@ -21,7 +21,7 @@ export default function LoginScreen() {
     const errors: Record<string, string> = {};
     if (!email.trim()) errors.email = 'Email address is required';
     if (!password) errors.password = 'Password is required';
-    
+
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
@@ -41,7 +41,10 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.header}>
             <Text style={styles.logoText}>KhattaBook</Text>
             <Text style={styles.subtitle}>Digital credit ledger notebook for shop owners</Text>
@@ -64,7 +67,7 @@ export default function LoginScreen() {
                 value={email}
                 onChangeText={(val) => {
                   setEmail(val);
-                  setValidationErrors(prev => ({ ...prev, email: '' }));
+                  setValidationErrors((prev) => ({ ...prev, email: '' }));
                 }}
                 mode="outlined"
                 keyboardType="email-address"
@@ -86,7 +89,7 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={(val) => {
                   setPassword(val);
-                  setValidationErrors(prev => ({ ...prev, password: '' }));
+                  setValidationErrors((prev) => ({ ...prev, password: '' }));
                 }}
                 mode="outlined"
                 secureTextEntry={!showPassword}
@@ -94,7 +97,7 @@ export default function LoginScreen() {
                 error={!!validationErrors.password}
                 right={
                   <TextInput.Icon
-                    icon={showPassword ? "eye-off" : "eye"}
+                    icon={showPassword ? 'eye-off' : 'eye'}
                     onPress={() => setShowPassword(!showPassword)}
                   />
                 }
@@ -122,7 +125,7 @@ export default function LoginScreen() {
           {/* Direct Sign-up Router */}
           <View style={styles.footerLinkRow}>
             <Text style={styles.footerLabel}>New to KhattaBook?</Text>
-            <Link href={"/signup" as any} asChild>
+            <Link href={'/signup' as any} asChild>
               <Button compact mode="text" labelStyle={styles.signUpTextLink}>
                 Register Shop
               </Button>

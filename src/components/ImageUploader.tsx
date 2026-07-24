@@ -79,7 +79,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               style={[
                 styles.placeholderBox,
                 isRound ? styles.roundBorder : styles.squareBorder,
-                { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.outlineVariant },
+                {
+                  backgroundColor: theme.colors.surfaceVariant,
+                  borderColor: theme.colors.outlineVariant,
+                },
               ]}
             >
               <ImageIcon size={32} color={theme.colors.onSurfaceVariant} />

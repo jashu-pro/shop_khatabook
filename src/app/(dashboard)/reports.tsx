@@ -14,7 +14,8 @@ export default function MobileReportsScreen() {
           <BarChart3 size={48} color={theme.colors.primary} style={{ marginBottom: 16 }} />
           <Text style={styles.heading}>Ledger Reports</Text>
           <Text style={styles.subtitle}>
-            Weekly sales summaries, collections, and pending payment charts will be generated here in later phases.
+            Weekly sales summaries, collections, and pending payment charts will be generated here
+            in later phases.
           </Text>
         </Surface>
       </View>

@@ -33,8 +33,14 @@ export const useCreateCustomerMutation = () => {
 export const useUpdateCustomerMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ customerId, input }: { customerId: string; input: UpdateCustomerInput; shopId: string }) =>
-      customerService.updateCustomer(customerId, input),
+    mutationFn: ({
+      customerId,
+      input,
+    }: {
+      customerId: string;
+      input: UpdateCustomerInput;
+      shopId: string;
+    }) => customerService.updateCustomer(customerId, input),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['customers', 'list', variables.shopId] });
       queryClient.invalidateQueries({ queryKey: ['customers', 'detail', data.id] });

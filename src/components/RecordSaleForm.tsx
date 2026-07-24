@@ -1,36 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  Modal, 
-  ScrollView, 
-  TouchableOpacity, 
-  ActivityIndicator, 
-  Alert 
+import {
+  View,
+  StyleSheet,
+  Modal,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
-import { 
-  Text, 
-  TextInput, 
-  Button, 
-  Surface, 
-  Avatar, 
-  IconButton, 
-  useTheme, 
+import {
+  Text,
+  TextInput,
+  Button,
+  Surface,
+  Avatar,
+  IconButton,
+  useTheme,
   Divider,
-  Checkbox
+  Checkbox,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCustomersQuery } from '../hooks/useCustomers';
 import { useCustomerBalanceQuery } from '../hooks/useSales';
 import { ImageUploader } from './ImageUploader';
-import { 
-  X, 
-  Search, 
-  AlertTriangle, 
-  CheckCircle2, 
-  FileSpreadsheet, 
-  User, 
-  UserCheck 
+import {
+  X,
+  Search,
+  AlertTriangle,
+  CheckCircle2,
+  FileSpreadsheet,
+  User,
+  UserCheck,
 } from 'lucide-react-native';
 import { customerService } from 'shared';
 
@@ -52,7 +52,7 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
   customerId: initialCustomerId,
   onClose,
   onSave,
-  isSubmitting
+  isSubmitting,
 }) => {
   const theme = useTheme();
 
@@ -61,7 +61,9 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
 
   // States
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(initialCustomerId || null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    initialCustomerId || null
+  );
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
   const [billPhotoBase64, setBillPhotoBase64] = useState<string | null>(null);
@@ -70,8 +72,8 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
 
   // Fetch balance for the selected customer
   const { data: balanceData } = useCustomerBalanceQuery(selectedCustomerId || undefined);
-  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
-  
+  const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
+
   const currentOutstanding = balanceData?.outstanding_credit || 0;
   const creditLimit = selectedCustomer?.credit_limit || 0;
   const saleAmount = parseFloat(amount) || 0;
@@ -80,14 +82,16 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
 
   // Reset override checked state if amount changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOverrideLimit(false);
   }, [amount]);
 
   // Filter customers matching query
-  const filteredCustomers = customers.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (c.phone && c.phone.includes(searchQuery)) ||
-    (c.village && c.village.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredCustomers = customers.filter(
+    (c) =>
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.phone && c.phone.includes(searchQuery)) ||
+      (c.village && c.village.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const formatAmount = (num: number) => {
@@ -111,7 +115,7 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
     if (isLimitExceeded && !overrideLimit) {
       Alert.alert(
         'Limit Exceeded',
-        'This sale will exceed the customer\'s credit limit. Please check the override checkbox to proceed.'
+        "This sale will exceed the customer's credit limit. Please check the override checkbox to proceed."
       );
       return;
     }
@@ -133,8 +137,8 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
       <SafeAreaView style={styles.modalContainer}>
         {/* Header */}
         <Surface style={styles.header} elevation={1}>
-          <IconButton 
-            icon={() => <X size={20} color={theme.colors.onSurface} />} 
+          <IconButton
+            icon={() => <X size={20} color={theme.colors.onSurface} />}
             onPress={onClose}
           />
           <Text style={styles.headerTitle}>Record Credit Sale</Text>
@@ -150,7 +154,11 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
               placeholder="Search by name, phone or village..."
               value={searchQuery}
               onChangeText={setSearchQuery}
-              left={<TextInput.Icon icon={() => <Search size={18} color={theme.colors.onSurfaceVariant} />} />}
+              left={
+                <TextInput.Icon
+                  icon={() => <Search size={18} color={theme.colors.onSurfaceVariant} />}
+                />
+              }
               style={styles.searchInput}
             />
 
@@ -162,16 +170,20 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
               </View>
             ) : (
               <ScrollView style={styles.customerList} keyboardShouldPersistTaps="handled">
-                {filteredCustomers.map(customer => (
-                  <TouchableOpacity 
-                    key={customer.id} 
+                {filteredCustomers.map((customer) => (
+                  <TouchableOpacity
+                    key={customer.id}
                     onPress={() => handleSelectCustomer(customer.id)}
                     style={styles.customerItem}
                   >
                     {customer.photo_url ? (
                       <Avatar.Image size={40} source={{ uri: customer.photo_url }} />
                     ) : (
-                      <Avatar.Icon size={40} icon="account" style={{ backgroundColor: theme.colors.surfaceVariant }} />
+                      <Avatar.Icon
+                        size={40}
+                        icon="account"
+                        style={{ backgroundColor: theme.colors.surfaceVariant }}
+                      />
                     )}
                     <View style={styles.customerMeta}>
                       <Text style={styles.customerName}>{customer.name}</Text>
@@ -186,7 +198,11 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
           </View>
         ) : (
           /* Step 2: Form Parameters & Verification */
-          <ScrollView style={styles.stepContainer} contentContainerStyle={{ paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            style={styles.stepContainer}
+            contentContainerStyle={{ paddingBottom: 32 }}
+            keyboardShouldPersistTaps="handled"
+          >
             {/* Customer Snippet */}
             {selectedCustomer && (
               <Surface style={styles.customerSnippet} elevation={1}>
@@ -201,7 +217,9 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
                     <Text style={styles.snippetSub}>{selectedCustomer.phone || 'No Mobile'}</Text>
                   </View>
                   {!initialCustomerId && (
-                    <Button compact mode="text" onPress={() => setStep(1)}>Change</Button>
+                    <Button compact mode="text" onPress={() => setStep(1)}>
+                      Change
+                    </Button>
                   )}
                 </View>
               </Surface>
@@ -242,7 +260,7 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
             {saleAmount > 0 && selectedCustomer && (
               <Surface style={styles.checkCard} elevation={1}>
                 <Text style={styles.checkCardTitle}>Credit Boundary Review</Text>
-                
+
                 <View style={styles.checkGrid}>
                   <View style={styles.checkCell}>
                     <Text style={styles.checkCellLabel}>Current Debt</Text>
@@ -258,24 +276,34 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
 
                 <View style={styles.checkRow}>
                   <Text style={styles.projectedLabel}>Projected Outstanding</Text>
-                  <Text style={[
-                    styles.projectedVal, 
-                    { color: isLimitExceeded ? theme.colors.error : theme.colors.primary }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.projectedVal,
+                      { color: isLimitExceeded ? theme.colors.error : theme.colors.primary },
+                    ]}
+                  >
                     ₹{formatAmount(newOutstanding)}
                   </Text>
                 </View>
 
                 {isLimitExceeded ? (
-                  <View style={[styles.alertBox, { backgroundColor: '#fef2f2', borderColor: '#fecaca' }]}>
+                  <View
+                    style={[
+                      styles.alertBox,
+                      { backgroundColor: '#fef2f2', borderColor: '#fecaca' },
+                    ]}
+                  >
                     <View style={styles.alertHeader}>
                       <AlertTriangle size={16} color={theme.colors.error} />
-                      <Text style={[styles.alertTitle, { color: theme.colors.error }]}>Credit Limit Exceeded</Text>
+                      <Text style={[styles.alertTitle, { color: theme.colors.error }]}>
+                        Credit Limit Exceeded
+                      </Text>
                     </View>
                     <Text style={styles.alertDesc}>
-                      Recording this credit transaction will exceed this customer's boundary limit.
+                      Recording this credit transaction will exceed this customer&apos;s boundary
+                      limit.
                     </Text>
-                    
+
                     <View style={styles.checkboxRow}>
                       <Checkbox
                         status={overrideLimit ? 'checked' : 'unchecked'}
@@ -283,15 +311,24 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
                         color={theme.colors.error}
                       />
                       <TouchableOpacity onPress={() => setOverrideLimit(!overrideLimit)}>
-                        <Text style={styles.checkboxText}>Override limit restriction & proceed</Text>
+                        <Text style={styles.checkboxText}>
+                          Override limit restriction & proceed
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   </View>
                 ) : (
-                  <View style={[styles.alertBox, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }]}>
+                  <View
+                    style={[
+                      styles.alertBox,
+                      { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' },
+                    ]}
+                  >
                     <View style={styles.alertHeader}>
                       <CheckCircle2 size={16} color="#15803d" />
-                      <Text style={[styles.alertTitle, { color: '#15803d' }]}>Within Credit limit</Text>
+                      <Text style={[styles.alertTitle, { color: '#15803d' }]}>
+                        Within Credit limit
+                      </Text>
                     </View>
                   </View>
                 )}
@@ -300,23 +337,14 @@ export const RecordSaleForm: React.FC<RecordSaleFormProps> = ({
 
             {/* Footer Buttons */}
             <View style={styles.footerRow}>
-              <Button 
-                mode="outlined" 
-                onPress={onClose} 
-                style={{ flex: 1 }}
-                disabled={isSubmitting}
-              >
+              <Button mode="outlined" onPress={onClose} style={{ flex: 1 }} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button 
-                mode="contained" 
-                onPress={handleSubmit} 
+              <Button
+                mode="contained"
+                onPress={handleSubmit}
                 style={{ flex: 1 }}
-                disabled={
-                  isSubmitting || 
-                  saleAmount <= 0 || 
-                  (isLimitExceeded && !overrideLimit)
-                }
+                disabled={isSubmitting || saleAmount <= 0 || (isLimitExceeded && !overrideLimit)}
                 loading={isSubmitting}
               >
                 Save Log

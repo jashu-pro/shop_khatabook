@@ -5,7 +5,7 @@ export interface DashboardMetrics {
   todayCollections: number;
   pendingPayments: number;
   activeCustomers: number;
-  
+
   // Trend percentage indicators (relative to yesterday/last week)
   totalCustomersTrend: number;
   outstandingCreditTrend: number;

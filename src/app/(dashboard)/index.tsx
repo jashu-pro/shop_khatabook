@@ -1,6 +1,24 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { Text, Surface, Avatar, IconButton, Searchbar, FAB, Portal, Provider, useTheme, Card } from 'react-native-paper';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import {
+  Text,
+  Surface,
+  Avatar,
+  IconButton,
+  Searchbar,
+  FAB,
+  Portal,
+  Provider,
+  useTheme,
+  Card,
+} from 'react-native-paper';
 import { useAuthStore } from '../../store/authStore';
 import { useShopQuery } from '../../hooks/useShop';
 import { useCustomersQuery } from '../../hooks/useCustomers';
@@ -8,14 +26,14 @@ import { useDashboardMetricsQuery, useRecentActivitiesQuery } from '../../hooks/
 import { useCreateSaleMutation } from '../../hooks/useSales';
 import { RecordSaleForm } from '../../components/RecordSaleForm';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { 
-  UserPlus, 
-  ShoppingBag, 
-  CircleDollarSign, 
-  BookOpen, 
-  Bell, 
+import {
+  UserPlus,
+  ShoppingBag,
+  CircleDollarSign,
+  BookOpen,
+  Bell,
   ArrowUpRight,
-  ArrowDownLeft
+  ArrowDownLeft,
 } from 'lucide-react-native';
 import { router } from 'expo-router';
 
@@ -27,7 +45,9 @@ export default function MobileDashboard() {
 
   // Queries
   const { data: metrics, isLoading: isMetricsLoading } = useDashboardMetricsQuery(user?.id);
-  const { data: activities = [], isLoading: isActivitiesLoading } = useRecentActivitiesQuery(user?.id);
+  const { data: activities = [], isLoading: isActivitiesLoading } = useRecentActivitiesQuery(
+    user?.id
+  );
   const createSaleMutation = useCreateSaleMutation();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,7 +72,10 @@ export default function MobileDashboard() {
     } else if (actionId === 'Credit Sale') {
       setIsRecordSaleOpen(true);
     } else if (actionId === 'Receive Payment') {
-      Alert.alert('Coming Soon', 'Receive Payment transaction wizard will be integrated in Phase 6.');
+      Alert.alert(
+        'Coming Soon',
+        'Receive Payment transaction wizard will be integrated in Phase 6.'
+      );
     } else if (actionId === 'Customer Ledger') {
       router.push('/sales' as any);
     }
@@ -71,7 +94,10 @@ export default function MobileDashboard() {
   return (
     <Provider>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Header Row */}
           <View style={styles.headerRow}>
             <View>
@@ -109,7 +135,7 @@ export default function MobileDashboard() {
             <ActivityIndicator style={{ marginBottom: 24 }} color={theme.colors.primary} />
           ) : (
             <Surface style={styles.summaryCard} elevation={2}>
-              <Text style={styles.summaryTitle}>Today's Summary</Text>
+              <Text style={styles.summaryTitle}>Today&apos;s Summary</Text>
 
               <View style={styles.metricsRow}>
                 <View style={styles.metricColumn}>
@@ -143,28 +169,40 @@ export default function MobileDashboard() {
           {/* Quick Actions Grid */}
           <Text style={styles.sectionHeading}>Quick Operations</Text>
           <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={styles.actionItem} onPress={() => handleQuickAction('Add Customer')}>
+            <TouchableOpacity
+              style={styles.actionItem}
+              onPress={() => handleQuickAction('Add Customer')}
+            >
               <Surface style={styles.actionIconBox} elevation={1}>
                 <UserPlus size={22} color={theme.colors.primary} />
               </Surface>
               <Text style={styles.actionLabel}>Add Customer</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionItem} onPress={() => handleQuickAction('Credit Sale')}>
+            <TouchableOpacity
+              style={styles.actionItem}
+              onPress={() => handleQuickAction('Credit Sale')}
+            >
               <Surface style={styles.actionIconBox} elevation={1}>
                 <ShoppingBag size={22} color="#f59e0b" />
               </Surface>
               <Text style={styles.actionLabel}>Credit Sale</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionItem} onPress={() => handleQuickAction('Receive Payment')}>
+            <TouchableOpacity
+              style={styles.actionItem}
+              onPress={() => handleQuickAction('Receive Payment')}
+            >
               <Surface style={styles.actionIconBox} elevation={1}>
                 <CircleDollarSign size={22} color="#10b981" />
               </Surface>
               <Text style={styles.actionLabel}>Collect Payment</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionItem} onPress={() => handleQuickAction('Customer Ledger')}>
+            <TouchableOpacity
+              style={styles.actionItem}
+              onPress={() => handleQuickAction('Customer Ledger')}
+            >
               <Surface style={styles.actionIconBox} elevation={1}>
                 <BookOpen size={22} color="#6366f1" />
               </Surface>
@@ -190,10 +228,16 @@ export default function MobileDashboard() {
               return (
                 <Surface key={act.id} style={styles.recentCustRow} elevation={1}>
                   <View style={styles.recentCustAvatarRow}>
-                    <View style={[
-                      styles.activityIconBox, 
-                      { backgroundColor: isSale ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)' }
-                    ]}>
+                    <View
+                      style={[
+                        styles.activityIconBox,
+                        {
+                          backgroundColor: isSale
+                            ? 'rgba(239, 68, 68, 0.08)'
+                            : 'rgba(16, 185, 129, 0.08)',
+                        },
+                      ]}
+                    >
                       {isSale ? (
                         <ArrowUpRight size={18} color={theme.colors.error} />
                       ) : (
@@ -209,10 +253,12 @@ export default function MobileDashboard() {
                   </View>
 
                   <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={[
-                      styles.recentCustAmt, 
-                      { color: isSale ? theme.colors.error : '#10b981' }
-                    ]}>
+                    <Text
+                      style={[
+                        styles.recentCustAmt,
+                        { color: isSale ? theme.colors.error : '#10b981' },
+                      ]}
+                    >
                       {isSale ? '+' : '-'} ₹{formatAmount(act.amount)}
                     </Text>
                   </View>

@@ -27,30 +27,34 @@ export const shopRegistrationSchema = z.object({
   pin_code: z.string().regex(PIN_CODE_REGEX, 'PIN Code must be exactly 6 digits'),
   country: z.string().default('India'),
 
-  gst: z.string()
-    .transform(val => val.trim().toUpperCase())
-    .refine(val => val === '' || GST_REGEX.test(val), {
+  gst: z
+    .string()
+    .transform((val) => val.trim().toUpperCase())
+    .refine((val) => val === '' || GST_REGEX.test(val), {
       message: 'Please enter a valid GST Number (e.g. 22AAAAA1111A1Z1)',
     })
     .optional()
     .or(z.literal('')),
-  pan: z.string()
-    .transform(val => val.trim().toUpperCase())
-    .refine(val => val === '' || PAN_REGEX.test(val), {
+  pan: z
+    .string()
+    .transform((val) => val.trim().toUpperCase())
+    .refine((val) => val === '' || PAN_REGEX.test(val), {
       message: 'Please enter a valid PAN (e.g. ABCDE1234F)',
     })
     .optional()
     .or(z.literal('')),
-  upi_id: z.string()
-    .transform(val => val.trim().toLowerCase())
-    .refine(val => val === '' || UPI_REGEX.test(val), {
+  upi_id: z
+    .string()
+    .transform((val) => val.trim().toLowerCase())
+    .refine((val) => val === '' || UPI_REGEX.test(val), {
       message: 'Please enter a valid UPI ID (e.g. name@bank)',
     })
     .optional()
     .or(z.literal('')),
-  business_email: z.string()
-    .transform(val => val.trim())
-    .refine(val => val === '' || z.string().email().safeParse(val).success, {
+  business_email: z
+    .string()
+    .transform((val) => val.trim())
+    .refine((val) => val === '' || z.string().email().safeParse(val).success, {
       message: 'Please enter a valid email address',
     })
     .optional()

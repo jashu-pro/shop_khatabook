@@ -8,11 +8,17 @@ interface AuthState {
   loading: boolean;
   initialized: boolean;
   error: string | null;
-  
+
   // Actions
   initializeAuth: () => () => void; // Returns unsubscribe function
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, phoneNumber?: string, avatarUrl?: string) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    phoneNumber?: string,
+    avatarUrl?: string
+  ) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -30,32 +36,33 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   initializeAuth: () => {
     set({ loading: true });
-    
+
     // Fetch initial session
-    authService.getCurrentSession()
+    authService
+      .getCurrentSession()
       .then((session) => {
-        set({ 
-          session, 
-          user: session?.user ?? null, 
+        set({
+          session,
+          user: session?.user ?? null,
           initialized: true,
-          loading: false 
+          loading: false,
         });
       })
       .catch((err) => {
-        set({ 
-          error: err.message || 'Failed to retrieve active session', 
+        set({
+          error: err.message || 'Failed to retrieve active session',
           initialized: true,
-          loading: false 
+          loading: false,
         });
       });
 
     // Listen for auth state transitions
     const authListener = authService.onSessionChange((session, user) => {
-      set({ 
-        session, 
-        user, 
-        initialized: true, 
-        loading: false 
+      set({
+        session,
+        user,
+        initialized: true,
+        loading: false,
       });
     });
 
@@ -71,15 +78,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { data, error } = await authService.signIn(email, password);
       if (error) throw error;
-      set({ 
-        session: data.session, 
-        user: data.user, 
-        loading: false 
+      set({
+        session: data.session,
+        user: data.user,
+        loading: false,
       });
     } catch (err: any) {
-      set({ 
-        error: err.message || 'Failed to sign in', 
-        loading: false 
+      set({
+        error: err.message || 'Failed to sign in',
+        loading: false,
       });
       throw err;
     }
@@ -89,22 +96,22 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true, error: null });
     try {
       const { data, error } = await authService.signUp(
-        email, 
-        password, 
-        fullName, 
-        phoneNumber, 
+        email,
+        password,
+        fullName,
+        phoneNumber,
         avatarUrl
       );
       if (error) throw error;
-      set({ 
-        session: data.session, 
-        user: data.user, 
-        loading: false 
+      set({
+        session: data.session,
+        user: data.user,
+        loading: false,
       });
     } catch (err: any) {
-      set({ 
-        error: err.message || 'Failed to sign up', 
-        loading: false 
+      set({
+        error: err.message || 'Failed to sign up',
+        loading: false,
       });
       throw err;
     }
@@ -118,9 +125,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Expo OAuth triggers are managed via redirects or native configs.
       set({ loading: false });
     } catch (err: any) {
-      set({ 
-        error: err.message || 'Failed Google Sign In', 
-        loading: false 
+      set({
+        error: err.message || 'Failed Google Sign In',
+        loading: false,
       });
       throw err;
     }
@@ -133,9 +140,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (error) throw error;
       set({ loading: false });
     } catch (err: any) {
-      set({ 
-        error: err.message || 'Failed to send reset link', 
-        loading: false 
+      set({
+        error: err.message || 'Failed to send reset link',
+        loading: false,
       });
       throw err;
     }
@@ -146,15 +153,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { error } = await authService.signOut();
       if (error) throw error;
-      set({ 
-        session: null, 
-        user: null, 
-        loading: false 
+      set({
+        session: null,
+        user: null,
+        loading: false,
       });
     } catch (err: any) {
-      set({ 
-        error: err.message || 'Failed to sign out', 
-        loading: false 
+      set({
+        error: err.message || 'Failed to sign out',
+        loading: false,
       });
       throw err;
     }

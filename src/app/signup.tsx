@@ -35,12 +35,7 @@ export default function SignupScreen() {
     }
 
     try {
-      await signUp(
-        email.trim(),
-        password,
-        fullName.trim(),
-        phone.trim() || undefined
-      );
+      await signUp(email.trim(), password, fullName.trim(), phone.trim() || undefined);
       // layout side-effect handles routing redirect automatically
     } catch (err: any) {
       // errors managed in store
@@ -53,10 +48,15 @@ export default function SignupScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.header}>
             <Text style={styles.logoText}>KhattaBook</Text>
-            <Text style={styles.subtitle}>Register your owner account to start tracking credit</Text>
+            <Text style={styles.subtitle}>
+              Register your owner account to start tracking credit
+            </Text>
           </View>
 
           <Surface style={styles.formCard} elevation={2}>
@@ -76,7 +76,7 @@ export default function SignupScreen() {
                 value={fullName}
                 onChangeText={(val) => {
                   setFullName(val);
-                  setValidationErrors(prev => ({ ...prev, fullName: '' }));
+                  setValidationErrors((prev) => ({ ...prev, fullName: '' }));
                 }}
                 mode="outlined"
                 disabled={loading}
@@ -96,7 +96,7 @@ export default function SignupScreen() {
                 value={email}
                 onChangeText={(val) => {
                   setEmail(val);
-                  setValidationErrors(prev => ({ ...prev, email: '' }));
+                  setValidationErrors((prev) => ({ ...prev, email: '' }));
                 }}
                 mode="outlined"
                 keyboardType="email-address"
@@ -118,7 +118,7 @@ export default function SignupScreen() {
                 value={phone}
                 onChangeText={(val) => {
                   setPhone(val);
-                  setValidationErrors(prev => ({ ...prev, phone: '' }));
+                  setValidationErrors((prev) => ({ ...prev, phone: '' }));
                 }}
                 mode="outlined"
                 keyboardType="phone-pad"
@@ -139,7 +139,7 @@ export default function SignupScreen() {
                 value={password}
                 onChangeText={(val) => {
                   setPassword(val);
-                  setValidationErrors(prev => ({ ...prev, password: '' }));
+                  setValidationErrors((prev) => ({ ...prev, password: '' }));
                 }}
                 mode="outlined"
                 secureTextEntry={!showPassword}
@@ -147,7 +147,7 @@ export default function SignupScreen() {
                 error={!!validationErrors.password}
                 right={
                   <TextInput.Icon
-                    icon={showPassword ? "eye-off" : "eye"}
+                    icon={showPassword ? 'eye-off' : 'eye'}
                     onPress={() => setShowPassword(!showPassword)}
                   />
                 }
@@ -175,7 +175,7 @@ export default function SignupScreen() {
           {/* Direct Login Router */}
           <View style={styles.footerLinkRow}>
             <Text style={styles.footerLabel}>Already have an account?</Text>
-            <Link href={"/login" as any} asChild>
+            <Link href={'/login' as any} asChild>
               <Button compact mode="text" labelStyle={styles.loginTextLink}>
                 Log In
               </Button>

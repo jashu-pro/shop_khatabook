@@ -14,7 +14,8 @@ export default function MobileLedgerScreen() {
           <BookOpen size={48} color={theme.colors.primary} style={{ marginBottom: 16 }} />
           <Text style={styles.heading}>Digital Ledger Book</Text>
           <Text style={styles.subtitle}>
-            All credit sales and payments logs will appear here. This section will be integrated in subsequent phases.
+            All credit sales and payments logs will appear here. This section will be integrated in
+            subsequent phases.
           </Text>
         </Surface>
       </View>

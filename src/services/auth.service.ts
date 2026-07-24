@@ -1,11 +1,11 @@
 import { supabase } from '../lib/supabase';
 import { IS_ENV_VALID } from '../constants/env';
-import type { 
-  AuthResponse, 
-  Session, 
-  User, 
+import type {
+  AuthResponse,
+  Session,
+  User,
   Subscription,
-  AuthChangeEvent 
+  AuthChangeEvent,
 } from '@supabase/supabase-js';
 
 const getOrigin = (): string => {
@@ -19,7 +19,13 @@ export const authService = {
   /**
    * Register a new user with email, password, and metadata
    */
-  async signUp(email: string, password: string, fullName: string, phoneNumber?: string, avatarUrl?: string): Promise<AuthResponse> {
+  async signUp(
+    email: string,
+    password: string,
+    fullName: string,
+    phoneNumber?: string,
+    avatarUrl?: string
+  ): Promise<AuthResponse> {
     if (!IS_ENV_VALID) throw new Error('Supabase is not configured.');
     return await supabase.auth.signUp({
       email,
@@ -87,7 +93,10 @@ export const authService = {
    */
   async getCurrentSession(): Promise<Session | null> {
     if (!IS_ENV_VALID) return null;
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
     if (error) throw error;
     return session;
   },
@@ -95,7 +104,9 @@ export const authService = {
   /**
    * Listen to active session changes (login, logout, refresh token)
    */
-  onSessionChange(callback: (session: Session | null, user: User | null) => void): { data: { subscription: Subscription } } | null {
+  onSessionChange(
+    callback: (session: Session | null, user: User | null) => void
+  ): { data: { subscription: Subscription } } | null {
     if (!IS_ENV_VALID) return null;
     return supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       callback(session, session?.user ?? null);

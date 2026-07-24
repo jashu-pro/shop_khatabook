@@ -44,11 +44,7 @@ export const shopService = {
    */
   async createShop(shopData: CreateShopInput): Promise<Shop> {
     if (!IS_ENV_VALID) throw new Error('Supabase is not configured.');
-    const { data, error } = await supabase
-      .from('shops')
-      .insert([shopData])
-      .select()
-      .single();
+    const { data, error } = await supabase.from('shops').insert([shopData]).select().single();
 
     if (error) {
       console.error('Error inserting shop:', error);
@@ -81,20 +77,18 @@ export const shopService = {
       const blob = await res.blob();
 
       const path = `${ownerId}/${fileName}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(path, blob, {
-          upsert: true,
-          contentType: blob.type || 'image/jpeg',
-        });
+
+      const { error: uploadError } = await supabase.storage.from(bucket).upload(path, blob, {
+        upsert: true,
+        contentType: blob.type || 'image/jpeg',
+      });
 
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(path);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(bucket).getPublicUrl(path);
 
       return { url: publicUrl, path };
     } catch (err: any) {

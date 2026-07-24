@@ -61,8 +61,14 @@ export const saleService = {
       throw paymentsError;
     }
 
-    const totalSales = (salesData || []).reduce((sum: number, s: any) => sum + Number(s.total_amount), 0);
-    const totalPayments = (paymentsData || []).reduce((sum: number, p: any) => sum + Number(p.payment_amount), 0);
+    const totalSales = (salesData || []).reduce(
+      (sum: number, s: any) => sum + Number(s.total_amount),
+      0
+    );
+    const totalPayments = (paymentsData || []).reduce(
+      (sum: number, p: any) => sum + Number(p.payment_amount),
+      0
+    );
 
     return {
       total_sales: totalSales,
@@ -83,11 +89,7 @@ export const saleService = {
       sale_number: input.sale_number || `SL-${Date.now()}`,
     };
 
-    const { data, error } = await supabase
-      .from('sales')
-      .insert([payload])
-      .select()
-      .single();
+    const { data, error } = await supabase.from('sales').insert([payload]).select().single();
 
     if (error) {
       console.error('Error creating credit sale:', error);
@@ -102,10 +104,7 @@ export const saleService = {
   async deleteSale(saleId: string): Promise<void> {
     if (!IS_ENV_VALID) return;
 
-    const { error } = await supabase
-      .from('sales')
-      .delete()
-      .eq('id', saleId);
+    const { error } = await supabase.from('sales').delete().eq('id', saleId);
 
     if (error) {
       console.error('Error deleting credit sale:', error);
@@ -131,7 +130,7 @@ export const saleService = {
     try {
       const res = await fetch(base64Data);
       const blob = await res.blob();
-      
+
       const path = `${shopId}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -143,9 +142,9 @@ export const saleService = {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('bill-attachments')
-        .getPublicUrl(path);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('bill-attachments').getPublicUrl(path);
 
       return { url: publicUrl, path };
     } catch (err: any) {

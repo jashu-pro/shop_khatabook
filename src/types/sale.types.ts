@@ -8,7 +8,7 @@ export interface Sale {
   notes: string | null;
   bill_photo_url: string | null;
   bill_photo_path: string | null;
-  
+
   created_at: string;
   updated_at: string;
 }
@@ -21,7 +21,7 @@ export interface Payment {
   payment_method: 'cash' | 'upi' | 'bank_transfer';
   payment_date: string;
   notes: string | null;
-  
+
   created_at: string;
   updated_at: string;
 }

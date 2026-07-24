@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Text, Surface, Avatar, TextInput, Button, SegmentedButtons, HelperText, useTheme } from 'react-native-paper';
+import {
+  Text,
+  Surface,
+  Avatar,
+  TextInput,
+  Button,
+  SegmentedButtons,
+  HelperText,
+  useTheme,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
 import { useShopQuery } from '../../hooks/useShop';
@@ -24,14 +33,16 @@ export default function MobileSettingsScreen() {
   const handleLogout = async () => {
     Alert.alert('Sign Out', 'Are you sure you want to log out of your shop ledger?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Log Out', onPress: async () => {
+      {
+        text: 'Log Out',
+        onPress: async () => {
           try {
             await signOut();
           } catch (err: any) {
             Alert.alert('Error', err.message || 'Logout failed.');
           }
-        }
-      }
+        },
+      },
     ]);
   };
 
@@ -54,12 +65,19 @@ export default function MobileSettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={styles.title}>Settings</Text>
 
         {/* Profile Card */}
         <Surface style={styles.profileSection} elevation={1}>
-          <Avatar.Text size={48} label={ownerName.substring(0, 2).toUpperCase() || 'SB'} style={{ backgroundColor: theme.colors.primaryContainer }} />
+          <Avatar.Text
+            size={48}
+            label={ownerName.substring(0, 2).toUpperCase() || 'SB'}
+            style={{ backgroundColor: theme.colors.primaryContainer }}
+          />
           <View style={{ marginLeft: 16 }}>
             <Text style={styles.ownerNameText}>{ownerName || 'Shop Owner'}</Text>
             <Text style={styles.ownerEmailText}>{user?.email}</Text>
@@ -83,12 +101,7 @@ export default function MobileSettingsScreen() {
         {/* Shop Configuration */}
         <Text style={styles.sectionTitle}>Shop Information</Text>
         <Surface style={styles.card} elevation={1}>
-          <ImageUploader
-            value={logo}
-            onChange={setLogo}
-            label="Shop Logo"
-            shape="square"
-          />
+          <ImageUploader value={logo} onChange={setLogo} label="Shop Logo" shape="square" />
 
           <TextInput
             label="Shop Name"

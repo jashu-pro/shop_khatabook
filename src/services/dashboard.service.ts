@@ -56,8 +56,14 @@ export const dashboardService = {
       const paymentsList = payments || [];
 
       // Calculate totals
-      const totalSalesSum = salesList.reduce((sum: number, s: any) => sum + Number(s.total_amount), 0);
-      const totalPaymentsSum = paymentsList.reduce((sum: number, p: any) => sum + Number(p.payment_amount), 0);
+      const totalSalesSum = salesList.reduce(
+        (sum: number, s: any) => sum + Number(s.total_amount),
+        0
+      );
+      const totalPaymentsSum = paymentsList.reduce(
+        (sum: number, p: any) => sum + Number(p.payment_amount),
+        0
+      );
       const outstandingCredit = totalSalesSum - totalPaymentsSum;
 
       // Calculate Today's metrics (midnight to now)
@@ -74,15 +80,17 @@ export const dashboardService = {
 
       // Group outstanding balances by customer to count active customers
       const customerBalances: Record<string, number> = {};
-      
+
       salesList.forEach((s: any) => {
-        customerBalances[s.customer_id] = (customerBalances[s.customer_id] || 0) + Number(s.total_amount);
+        customerBalances[s.customer_id] =
+          (customerBalances[s.customer_id] || 0) + Number(s.total_amount);
       });
       paymentsList.forEach((p: any) => {
-        customerBalances[p.customer_id] = (customerBalances[p.customer_id] || 0) - Number(p.payment_amount);
+        customerBalances[p.customer_id] =
+          (customerBalances[p.customer_id] || 0) - Number(p.payment_amount);
       });
 
-      const activeCustomers = Object.values(customerBalances).filter(bal => bal > 0).length;
+      const activeCustomers = Object.values(customerBalances).filter((bal) => bal > 0).length;
       const pendingPayments = activeCustomers; // Customers with outstanding credit > 0
 
       return {
@@ -92,7 +100,7 @@ export const dashboardService = {
         todayCollections,
         pendingPayments,
         activeCustomers,
-        
+
         // Static trend indicators to keep UI clean and consistent
         totalCustomersTrend: totalCustomers && totalCustomers > 0 ? 12 : 0,
         outstandingCreditTrend: outstandingCredit > 0 ? -4 : 0,
@@ -238,7 +246,7 @@ export const dashboardService = {
         return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
       };
 
-      return combined.map(item => ({
+      return combined.map((item) => ({
         id: item.id,
         customerName: item.customerName,
         customerPhone: item.customerPhone,

@@ -1,36 +1,48 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Linking, TouchableOpacity } from 'react-native';
-import { Text, Surface, Avatar, Button, TextInput, HelperText, useTheme, ActivityIndicator, Portal, Modal, Divider, IconButton } from 'react-native-paper';
+import {
+  Text,
+  Surface,
+  Avatar,
+  Button,
+  TextInput,
+  HelperText,
+  useTheme,
+  ActivityIndicator,
+  Portal,
+  Modal,
+  Divider,
+  IconButton,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuthStore } from '../../store/authStore';
 import { useShopQuery } from '../../hooks/useShop';
-import { 
-  useCustomerDetailQuery, 
-  useUpdateCustomerMutation, 
-  useDeleteCustomerMutation 
+import {
+  useCustomerDetailQuery,
+  useUpdateCustomerMutation,
+  useDeleteCustomerMutation,
 } from '../../hooks/useCustomers';
-import { 
-  useCustomerBalanceQuery, 
-  useCustomerLedgerQuery, 
-  useCreateSaleMutation 
+import {
+  useCustomerBalanceQuery,
+  useCustomerLedgerQuery,
+  useCreateSaleMutation,
 } from '../../hooks/useSales';
 import { ImageUploader } from '../../components/ImageUploader';
 import { RecordSaleForm } from '../../components/RecordSaleForm';
-import { customerSchema } from 'shared';
-import { customerService } from 'shared';
-import { 
-  Phone, 
-  MapPin, 
-  Calendar, 
-  Wallet, 
-  Trash2, 
-  Edit2, 
-  ArrowLeft, 
+import { customerSchema , customerService } from 'shared';
+import {
+  Phone,
+  MapPin,
+  Calendar,
+  Wallet,
+  Trash2,
+  Edit2,
+  ArrowLeft,
   Send,
   Plus,
   ArrowUpRight,
-  ArrowDownLeft
+  ArrowDownLeft,
 } from 'lucide-react-native';
 
 export default function MobileCustomerDetail() {
@@ -188,9 +200,10 @@ export default function MobileCustomerDetail() {
       return;
     }
 
-    const formattedPhone = customer.phone.startsWith('91') || customer.phone.length > 10
-      ? customer.phone 
-      : `91${customer.phone}`;
+    const formattedPhone =
+      customer.phone.startsWith('91') || customer.phone.length > 10
+        ? customer.phone
+        : `91${customer.phone}`;
 
     const shopName = shop?.shop_name || 'our store';
     const msg = `Dear ${customer.name}, this is a friendly reminder from ${shopName} that your outstanding credit balance in our ledger is ₹${formatAmount(outstandingCredit)}. Please clear it at your earliest convenience. Thank you!`;
@@ -225,7 +238,11 @@ export default function MobileCustomerDetail() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Customer Not Found</Text>
-          <Button mode="contained" onPress={() => router.replace('/(dashboard)/customers' as any)} style={{ marginTop: 16 }}>
+          <Button
+            mode="contained"
+            onPress={() => router.replace('/(dashboard)/customers' as any)}
+            style={{ marginTop: 16 }}
+          >
             Back to Customers
           </Button>
         </View>
@@ -239,8 +256,8 @@ export default function MobileCustomerDetail() {
 
   // Combine sales and payments sorted by date desc
   const ledgerChronology = [
-    ...ledgerData.sales.map(s => ({ ...s, entryType: 'sale' as const })),
-    ...ledgerData.payments.map(p => ({ ...p, entryType: 'payment' as const }))
+    ...ledgerData.sales.map((s) => ({ ...s, entryType: 'sale' as const })),
+    ...ledgerData.payments.map((p) => ({ ...p, entryType: 'payment' as const })),
   ].sort((a, b) => {
     const dateA = new Date(a.entryType === 'sale' ? a.sale_date : a.payment_date).getTime();
     const dateB = new Date(b.entryType === 'sale' ? b.sale_date : b.payment_date).getTime();
@@ -255,21 +272,24 @@ export default function MobileCustomerDetail() {
           onPress={() => router.back()}
         />
         <Text style={styles.headerTitle}>Customer Profile</Text>
-        <IconButton
-          icon="pencil"
-          iconColor={theme.colors.primary}
-          onPress={handleOpenEdit}
-        />
+        <IconButton icon="pencil" iconColor={theme.colors.primary} onPress={handleOpenEdit} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Profile Card */}
         <Surface style={styles.profileCard} elevation={1}>
           <View style={styles.profileHeader}>
             {customer.photo_url ? (
               <Avatar.Image size={64} source={{ uri: customer.photo_url }} />
             ) : (
-              <Avatar.Icon size={64} icon="account" style={{ backgroundColor: theme.colors.primaryContainer }} />
+              <Avatar.Icon
+                size={64}
+                icon="account"
+                style={{ backgroundColor: theme.colors.primaryContainer }}
+              />
             )}
 
             <View style={{ marginLeft: 16, flex: 1 }}>
@@ -277,7 +297,11 @@ export default function MobileCustomerDetail() {
               <View style={styles.dateRow}>
                 <Calendar size={12} color="#94a3b8" />
                 <Text style={styles.dateText}>
-                  Added {new Date(customer.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                  Added{' '}
+                  {new Date(customer.created_at).toLocaleDateString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                  })}
                 </Text>
               </View>
             </View>
@@ -288,7 +312,12 @@ export default function MobileCustomerDetail() {
           {/* Balance card panel */}
           <Surface style={styles.balanceBox} elevation={0}>
             <Text style={styles.balanceLabel}>Outstanding Balance</Text>
-            <Text style={[styles.balanceValue, { color: outstandingCredit > 0 ? theme.colors.error : '#64748b' }]}>
+            <Text
+              style={[
+                styles.balanceValue,
+                { color: outstandingCredit > 0 ? theme.colors.error : '#64748b' },
+              ]}
+            >
               ₹{formatAmount(outstandingCredit)}
             </Text>
 
@@ -306,7 +335,9 @@ export default function MobileCustomerDetail() {
               mode="outlined"
               onPress={handleSendReminder}
               disabled={outstandingCredit === 0}
-              icon={() => <Send size={14} color={outstandingCredit > 0 ? theme.colors.primary : '#94a3b8'} />}
+              icon={() => (
+                <Send size={14} color={outstandingCredit > 0 ? theme.colors.primary : '#94a3b8'} />
+              )}
               style={styles.reminderBtn}
             >
               Send WhatsApp Reminder
@@ -361,17 +392,21 @@ export default function MobileCustomerDetail() {
               const isSale = entry.entryType === 'sale';
               const amount = isSale ? entry.total_amount : entry.payment_amount;
               const date = isSale ? entry.sale_date : entry.payment_date;
-              const label = isSale 
-                ? `Credit Sale (${entry.sale_number})` 
+              const label = isSale
+                ? `Credit Sale (${entry.sale_number})`
                 : `Payment Received (${entry.payment_method?.toUpperCase()})`;
               const notesText = entry.notes || '';
-              
+
               return (
                 <View key={entry.id} style={styles.ledgerLogItem}>
                   <View style={styles.ledgerLogMeta}>
                     <View style={styles.ledgerLogHeader}>
                       {isSale ? (
-                        <ArrowUpRight size={14} color={theme.colors.error} style={{ marginRight: 4 }} />
+                        <ArrowUpRight
+                          size={14}
+                          color={theme.colors.error}
+                          style={{ marginRight: 4 }}
+                        />
                       ) : (
                         <ArrowDownLeft size={14} color="#10b981" style={{ marginRight: 4 }} />
                       )}
@@ -382,15 +417,17 @@ export default function MobileCustomerDetail() {
                         day: '2-digit',
                         month: 'short',
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
                       })}
                     </Text>
                     {notesText ? <Text style={styles.ledgerLogNotes}>{notesText}</Text> : null}
                   </View>
-                  <Text style={[
-                    styles.ledgerLogAmt, 
-                    { color: isSale ? theme.colors.error : '#10b981' }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.ledgerLogAmt,
+                      { color: isSale ? theme.colors.error : '#10b981' },
+                    ]}
+                  >
                     {isSale ? '+' : '-'} ₹{formatAmount(amount)}
                   </Text>
                 </View>
@@ -499,10 +536,20 @@ export default function MobileCustomerDetail() {
             />
 
             <View style={styles.modalBtnRow}>
-              <Button mode="outlined" onPress={() => setIsEditOpen(false)} style={{ flex: 1, marginRight: 8 }}>
+              <Button
+                mode="outlined"
+                onPress={() => setIsEditOpen(false)}
+                style={{ flex: 1, marginRight: 8 }}
+              >
                 Cancel
               </Button>
-              <Button mode="contained" onPress={handleUpdate} loading={saving} disabled={saving} style={{ flex: 1 }}>
+              <Button
+                mode="contained"
+                onPress={handleUpdate}
+                loading={saving}
+                disabled={saving}
+                style={{ flex: 1 }}
+              >
                 Save
               </Button>
             </View>

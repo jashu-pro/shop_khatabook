@@ -8,7 +8,7 @@ export const customerService = {
    */
   async getCustomers(shopId: string): Promise<Customer[]> {
     if (!IS_ENV_VALID) return [];
-    
+
     const { data, error } = await supabase
       .from('customers')
       .select('*')
@@ -44,7 +44,11 @@ export const customerService = {
   /**
    * Check if a phone number already exists for a customer in the same shop
    */
-  async checkPhoneExists(shopId: string, phone: string, excludeCustomerId?: string): Promise<boolean> {
+  async checkPhoneExists(
+    shopId: string,
+    phone: string,
+    excludeCustomerId?: string
+  ): Promise<boolean> {
     if (!IS_ENV_VALID || !phone) return false;
 
     let query = supabase
@@ -72,11 +76,7 @@ export const customerService = {
   async createCustomer(input: CreateCustomerInput): Promise<Customer> {
     if (!IS_ENV_VALID) throw new Error('Supabase is not configured.');
 
-    const { data, error } = await supabase
-      .from('customers')
-      .insert([input])
-      .select()
-      .single();
+    const { data, error } = await supabase.from('customers').insert([input]).select().single();
 
     if (error) {
       console.error('Error creating customer:', error);
@@ -111,10 +111,7 @@ export const customerService = {
   async deleteCustomer(customerId: string): Promise<void> {
     if (!IS_ENV_VALID) return;
 
-    const { error } = await supabase
-      .from('customers')
-      .delete()
-      .eq('id', customerId);
+    const { error } = await supabase.from('customers').delete().eq('id', customerId);
 
     if (error) {
       console.error('Error deleting customer:', error);
@@ -139,7 +136,7 @@ export const customerService = {
     try {
       const res = await fetch(base64Data);
       const blob = await res.blob();
-      
+
       const path = `${shopId}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -151,9 +148,9 @@ export const customerService = {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('customer-photos')
-        .getPublicUrl(path);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('customer-photos').getPublicUrl(path);
 
       return { url: publicUrl, path };
     } catch (err: any) {

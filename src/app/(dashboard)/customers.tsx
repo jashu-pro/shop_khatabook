@@ -1,15 +1,90 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { Text, Surface, Avatar, Searchbar, FAB, Portal, Modal, Button, TextInput, HelperText, useTheme, ActivityIndicator } from 'react-native-paper';
+import {
+  Text,
+  Surface,
+  Avatar,
+  Searchbar,
+  FAB,
+  Portal,
+  Modal,
+  Button,
+  TextInput,
+  HelperText,
+  useTheme,
+  ActivityIndicator,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
 import { useShopQuery } from '../../hooks/useShop';
 import { useCustomersQuery, useCreateCustomerMutation } from '../../hooks/useCustomers';
+import { useCustomerBalanceQuery } from '../../hooks/useSales';
 import { ImageUploader } from '../../components/ImageUploader';
-import { customerSchema } from 'shared';
-import { customerService } from 'shared';
+import { customerSchema , customerService } from 'shared';
 import { Phone, MapPin, User, Wallet, Plus, Loader2 } from 'lucide-react-native';
 import { router } from 'expo-router';
+import type { Customer } from '../../types/customer.types';
+
+function CustomerItem({ item, theme }: { item: Customer; theme: any }) {
+  const { data: balanceData, isLoading } = useCustomerBalanceQuery(item.id);
+  const balance = balanceData?.outstanding_credit ?? 0;
+
+  const formatAmount = (num: number) => {
+    return new Intl.NumberFormat('en-IN').format(num);
+  };
+
+  return (
+    <Surface style={styles.custCard} elevation={1}>
+      <TouchableOpacity
+        style={styles.custCardContent}
+        onPress={() => router.push(`/customers/${item.id}` as any)}
+      >
+        {item.photo_url ? (
+          <Avatar.Image size={46} source={{ uri: item.photo_url }} />
+        ) : (
+          <Avatar.Icon
+            size={46}
+            icon="account"
+            style={{ backgroundColor: theme.colors.primaryContainer }}
+          />
+        )}
+        <View style={styles.custCardMeta}>
+          <Text style={styles.nameText}>{item.name}</Text>
+          <View style={styles.metaLabelRow}>
+            {item.phone && (
+              <View style={styles.metaBadge}>
+                <Phone size={10} color="#64748b" />
+                <Text style={styles.metaBadgeText}>{item.phone}</Text>
+              </View>
+            )}
+            {item.village && (
+              <View style={styles.metaBadge}>
+                <MapPin size={10} color="#64748b" />
+                <Text style={styles.metaBadgeText}>{item.village}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.creditValueBox}>
+          <Text style={styles.creditValueTitle}>Balance</Text>
+          {isLoading ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginTop: 4 }} />
+          ) : (
+            <Text
+              style={[
+                styles.creditValueText,
+                { color: balance > 0 ? theme.colors.error : '#10b981' },
+              ]}
+            >
+              ₹{formatAmount(balance)}
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    </Surface>
+  );
+}
 
 export default function MobileCustomersList() {
   const theme = useTheme();
@@ -19,7 +94,7 @@ export default function MobileCustomersList() {
   const createCustomerMutation = useCreateCustomerMutation();
 
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Modal & Form State
   const [modalOpen, setModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -127,7 +202,7 @@ export default function MobileCustomersList() {
   };
 
   const filteredCustomers = customers.filter((cust) => {
-    const matchesSearch = 
+    const matchesSearch =
       cust.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (cust.phone && cust.phone.includes(searchQuery)) ||
       (cust.village && cust.village.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -152,56 +227,13 @@ export default function MobileCustomersList() {
             <ActivityIndicator size="large" color={theme.colors.primary} />
           </View>
         ) : filteredCustomers.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No customers found</Text>
-            <Text style={styles.emptySub}>
-              {searchQuery ? 'Try a different search term' : 'Start by adding your first customer'}
-            </Text>
-          </View>
+          <Text style={styles.emptyText}>No customers found matching search.</Text>
         ) : (
           <FlatList
             data={filteredCustomers}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContainer}
-            renderItem={({ item }) => (
-              <Surface style={styles.custCard} elevation={1}>
-                <TouchableOpacity
-                  style={styles.custCardContent}
-                  onPress={() => router.push(`/customers/${item.id}` as any)}
-                >
-                  {item.photo_url ? (
-                    <Avatar.Image size={46} source={{ uri: item.photo_url }} />
-                  ) : (
-                    <Avatar.Icon size={46} icon="account" style={{ backgroundColor: theme.colors.primaryContainer }} />
-                  )}
-
-                  <View style={styles.custCardMeta}>
-                    <Text style={styles.nameText}>{item.name}</Text>
-                    <View style={styles.metaLabelRow}>
-                      {item.phone && (
-                        <View style={styles.metaBadge}>
-                          <Phone size={10} color="#64748b" />
-                          <Text style={styles.metaBadgeText}>{item.phone}</Text>
-                        </View>
-                      )}
-                      {item.village && (
-                        <View style={styles.metaBadge}>
-                          <MapPin size={10} color="#64748b" />
-                          <Text style={styles.metaBadgeText}>{item.village}</Text>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-
-                  <View style={styles.creditValueBox}>
-                    <Text style={styles.creditValueTitle}>Balance</Text>
-                    <Text style={[styles.creditValueText, { color: theme.colors.error }]}>
-                      ₹0
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </Surface>
-            )}
+            renderItem={({ item }) => <CustomerItem item={item} theme={theme} />}
           />
         )}
 
@@ -293,7 +325,11 @@ export default function MobileCustomersList() {
             />
 
             <View style={styles.modalBtnRow}>
-              <Button mode="outlined" onPress={() => setModalOpen(false)} style={{ flex: 1, marginRight: 8 }}>
+              <Button
+                mode="outlined"
+                onPress={() => setModalOpen(false)}
+                style={{ flex: 1, marginRight: 8 }}
+              >
                 Cancel
               </Button>
               <Button

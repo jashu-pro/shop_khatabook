@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text, Surface, HelperText, ProgressBar, SegmentedButtons, Checkbox, useTheme } from 'react-native-paper';
+import {
+  TextInput,
+  Button,
+  Text,
+  Surface,
+  HelperText,
+  ProgressBar,
+  SegmentedButtons,
+  Checkbox,
+  useTheme,
+} from 'react-native-paper';
 import { router } from 'expo-router';
 import { useAuthStore } from '../store/authStore';
 import { useCreateShopMutation } from '../hooks/useShop';
 import { ImageUploader } from '../components/ImageUploader';
-import { shopRegistrationSchema } from 'shared';
-import { BUSINESS_CATEGORIES } from 'shared';
-import { INDIAN_STATES } from 'shared';
+import { shopRegistrationSchema , BUSINESS_CATEGORIES , INDIAN_STATES } from 'shared';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RegisterShopScreen() {
@@ -75,19 +83,20 @@ export default function RegisterShopScreen() {
 
   const handleNext = () => {
     if (validateStep()) {
-      setStep(prev => prev + 1);
+      setStep((prev) => prev + 1);
     }
   };
 
   const handleBack = () => {
-    setStep(prev => prev - 1);
+    setStep((prev) => prev - 1);
   };
 
   const handleSubmit = async () => {
     if (!validateStep()) return;
     if (!user?.id) return;
 
-    const selectedStateName = INDIAN_STATES.find(s => s.code === stateCode)?.name || 'Andhra Pradesh';
+    const selectedStateName =
+      INDIAN_STATES.find((s) => s.code === stateCode)?.name || 'Andhra Pradesh';
 
     const payload = {
       owner_id: user.id,
@@ -161,8 +170,11 @@ export default function RegisterShopScreen() {
         style={{ flex: 1 }}
       >
         <ProgressBar progress={progress} color={theme.colors.primary} style={styles.progressBar} />
-        
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.header}>
             <Text style={styles.stepTitle}>Step {step} of 4</Text>
             <Text style={styles.subtitle}>
@@ -349,7 +361,11 @@ export default function RegisterShopScreen() {
             {/* Form Controls */}
             <View style={styles.btnRow}>
               {step > 1 && (
-                <Button mode="outlined" onPress={handleBack} style={[styles.controlBtn, { marginRight: 8 }]}>
+                <Button
+                  mode="outlined"
+                  onPress={handleBack}
+                  style={[styles.controlBtn, { marginRight: 8 }]}
+                >
                   Back
                 </Button>
               )}
@@ -358,9 +374,9 @@ export default function RegisterShopScreen() {
                   Next
                 </Button>
               ) : (
-                <Button 
-                  mode="contained" 
-                  onPress={handleSubmit} 
+                <Button
+                  mode="contained"
+                  onPress={handleSubmit}
                   style={styles.controlBtn}
                   loading={createShopMutation.isPending}
                   disabled={createShopMutation.isPending}

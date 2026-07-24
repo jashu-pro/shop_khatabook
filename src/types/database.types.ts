@@ -1,0 +1,264 @@
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
+export interface Database {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          id: string;
+          email: string;
+          full_name: string | null;
+          phone_number: string | null;
+          avatar_url: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          email: string;
+          full_name?: string | null;
+          phone_number?: string | null;
+          avatar_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          full_name?: string | null;
+          phone_number?: string | null;
+          avatar_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      shops: {
+        Row: {
+          id: string;
+          owner_id: string;
+          owner_name: string;
+          owner_phone: string;
+          owner_photo_url: string | null;
+          owner_photo_path: string | null;
+          shop_name: string;
+          shop_code: string;
+          shop_logo_url: string | null;
+          shop_logo_path: string | null;
+          business_category: string;
+          door_number: string | null;
+          street: string | null;
+          area: string | null;
+          village_town: string;
+          mandal: string | null;
+          district: string;
+          state: string;
+          pin_code: string;
+          country: string;
+          gst: string | null;
+          pan: string | null;
+          upi_id: string | null;
+          business_email: string | null;
+          language: string;
+          currency: string;
+          theme: string;
+          payment_reminder: boolean;
+          whatsapp_reminder: boolean;
+          sms_reminder: boolean;
+          ai_daily_summary: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          owner_name: string;
+          owner_phone: string;
+          owner_photo_url?: string | null;
+          owner_photo_path?: string | null;
+          shop_name: string;
+          shop_code: string;
+          shop_logo_url?: string | null;
+          shop_logo_path?: string | null;
+          business_category: string;
+          door_number?: string | null;
+          street?: string | null;
+          area?: string | null;
+          village_town: string;
+          mandal?: string | null;
+          district: string;
+          state: string;
+          pin_code: string;
+          country?: string;
+          gst?: string | null;
+          pan?: string | null;
+          upi_id?: string | null;
+          business_email?: string | null;
+          language?: string;
+          currency?: string;
+          theme?: string;
+          payment_reminder?: boolean;
+          whatsapp_reminder?: boolean;
+          sms_reminder?: boolean;
+          ai_daily_summary?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          owner_name?: string;
+          owner_phone?: string;
+          owner_photo_url?: string | null;
+          owner_photo_path?: string | null;
+          shop_name?: string;
+          shop_code?: string;
+          shop_logo_url?: string | null;
+          shop_logo_path?: string | null;
+          business_category?: string;
+          door_number?: string | null;
+          street?: string | null;
+          area?: string | null;
+          village_town?: string;
+          mandal?: string | null;
+          district?: string;
+          state?: string;
+          pin_code?: string;
+          country?: string;
+          gst?: string | null;
+          pan?: string | null;
+          upi_id?: string | null;
+          business_email?: string | null;
+          language?: string;
+          currency?: string;
+          theme?: string;
+          payment_reminder?: boolean;
+          whatsapp_reminder?: boolean;
+          sms_reminder?: boolean;
+          ai_daily_summary?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      customers: {
+        Row: {
+          id: string;
+          shop_id: string;
+          name: string;
+          phone: string | null;
+          photo_url: string | null;
+          photo_path: string | null;
+          village: string | null;
+          address: string | null;
+          notes: string | null;
+          credit_limit: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          shop_id: string;
+          name: string;
+          phone?: string | null;
+          photo_url?: string | null;
+          photo_path?: string | null;
+          village?: string | null;
+          address?: string | null;
+          notes?: string | null;
+          credit_limit?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          shop_id?: string;
+          name?: string;
+          phone?: string | null;
+          photo_url?: string | null;
+          photo_path?: string | null;
+          village?: string | null;
+          address?: string | null;
+          notes?: string | null;
+          credit_limit?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      sales: {
+        Row: {
+          id: string;
+          shop_id: string;
+          customer_id: string;
+          sale_number: string;
+          sale_date: string;
+          total_amount: number;
+          notes: string | null;
+          bill_photo_url: string | null;
+          bill_photo_path: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          shop_id: string;
+          customer_id: string;
+          sale_number: string;
+          sale_date?: string;
+          total_amount: number;
+          notes?: string | null;
+          bill_photo_url?: string | null;
+          bill_photo_path?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          shop_id?: string;
+          customer_id?: string;
+          sale_number?: string;
+          sale_date?: string;
+          total_amount?: number;
+          notes?: string | null;
+          bill_photo_url?: string | null;
+          bill_photo_path?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      payments: {
+        Row: {
+          id: string;
+          shop_id: string;
+          customer_id: string;
+          payment_amount: number;
+          payment_method: string;
+          payment_date: string;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          shop_id: string;
+          customer_id: string;
+          payment_amount: number;
+          payment_method?: string;
+          payment_date?: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          shop_id?: string;
+          customer_id?: string;
+          payment_amount?: number;
+          payment_method?: string;
+          payment_date?: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+    };
+  };
+}

@@ -9,7 +9,7 @@ export interface Customer {
   address: string | null;
   notes: string | null;
   credit_limit: number;
-  
+
   created_at: string;
   updated_at: string;
 }
