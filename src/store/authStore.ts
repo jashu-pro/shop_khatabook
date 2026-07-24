@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { authService } from '@/features/auth/services/auth.service';
+import { authService } from 'shared';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthState {
@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
 
     return () => {
-      if (authListener && authListener.data) {
+      if (authListener && authListener.data && authListener.data.subscription) {
         authListener.data.subscription.unsubscribe();
       }
     };
@@ -78,7 +78,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (err: any) {
       set({ 
-        error: err.message || 'Invalid credentials. Please try again.', 
+        error: err.message || 'Failed to sign in', 
         loading: false 
       });
       throw err;
@@ -88,7 +88,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   signUp: async (email, password, fullName, phoneNumber, avatarUrl) => {
     set({ loading: true, error: null });
     try {
-      const { data, error } = await authService.signUp(email, password, fullName, phoneNumber, avatarUrl);
+      const { data, error } = await authService.signUp(
+        email, 
+        password, 
+        fullName, 
+        phoneNumber, 
+        avatarUrl
+      );
       if (error) throw error;
       set({ 
         session: data.session, 
@@ -97,7 +103,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (err: any) {
       set({ 
-        error: err.message || 'Failed to sign up. Please try again.', 
+        error: err.message || 'Failed to sign up', 
         loading: false 
       });
       throw err;
@@ -107,10 +113,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   signInWithGoogle: async () => {
     set({ loading: true, error: null });
     try {
-      await authService.signInWithGoogle();
+      const data = await authService.signInWithGoogle();
+      if (!data) throw new Error('Google Sign In failed');
+      // Expo OAuth triggers are managed via redirects or native configs.
+      set({ loading: false });
     } catch (err: any) {
       set({ 
-        error: err.message || 'Google Auth login failed.', 
+        error: err.message || 'Failed Google Sign In', 
         loading: false 
       });
       throw err;
@@ -125,7 +134,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: false });
     } catch (err: any) {
       set({ 
-        error: err.message || 'Failed to trigger reset email.', 
+        error: err.message || 'Failed to send reset link', 
         loading: false 
       });
       throw err;
@@ -144,7 +153,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (err: any) {
       set({ 
-        error: err.message || 'Logout failed.', 
+        error: err.message || 'Failed to sign out', 
         loading: false 
       });
       throw err;
