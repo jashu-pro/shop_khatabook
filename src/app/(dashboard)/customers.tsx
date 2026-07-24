@@ -20,7 +20,7 @@ import { useShopQuery } from '../../hooks/useShop';
 import { useCustomersQuery, useCreateCustomerMutation } from '../../hooks/useCustomers';
 import { useCustomerBalanceQuery } from '../../hooks/useSales';
 import { ImageUploader } from '../../components/ImageUploader';
-import { customerSchema , customerService } from 'shared';
+import { customerSchema, customerService } from 'shared';
 import { Phone, MapPin, User, Wallet, Plus, Loader2 } from 'lucide-react-native';
 import { router } from 'expo-router';
 import type { Customer } from '../../types/customer.types';

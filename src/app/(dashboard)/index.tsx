@@ -110,7 +110,10 @@ export default function MobileDashboard() {
                 icon={() => <Bell size={20} color={theme.colors.onSurface} />}
                 onPress={() => Alert.alert('Notifications', 'No new alerts.')}
               />
-              <TouchableOpacity onPress={() => router.push('/(dashboard)/settings' as any)}>
+              <TouchableOpacity
+                onPress={() => router.push('/(dashboard)/settings' as any)}
+                style={{ marginRight: 8 }}
+              >
                 {shop?.owner_photo_url ? (
                   <Avatar.Image size={36} source={{ uri: shop.owner_photo_url }} />
                 ) : (

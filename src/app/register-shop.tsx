@@ -15,7 +15,7 @@ import { router } from 'expo-router';
 import { useAuthStore } from '../store/authStore';
 import { useCreateShopMutation } from '../hooks/useShop';
 import { ImageUploader } from '../components/ImageUploader';
-import { shopRegistrationSchema , BUSINESS_CATEGORIES , INDIAN_STATES } from 'shared';
+import { shopRegistrationSchema, BUSINESS_CATEGORIES, INDIAN_STATES } from 'shared';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RegisterShopScreen() {

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { saleService } from 'shared';
-import type { SaleWithCustomer , CreateSaleInput } from 'shared';
+import type { SaleWithCustomer, CreateSaleInput } from 'shared';
 
 export const useSalesQuery = (shopId: string | undefined) => {
   return useQuery<SaleWithCustomer[]>({

@@ -30,7 +30,7 @@ import {
 } from '../../hooks/useSales';
 import { ImageUploader } from '../../components/ImageUploader';
 import { RecordSaleForm } from '../../components/RecordSaleForm';
-import { customerSchema , customerService } from 'shared';
+import { customerSchema, customerService } from 'shared';
 import {
   Phone,
   MapPin,
