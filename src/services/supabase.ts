@@ -1,6 +1,6 @@
 // Supabase Service Integration with automatic LocalStorage Fallback & Background Cloud Sync
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { Customer, Product, Sale, Payment, LedgerEntry, Shop } from '../types';
+import type { Customer, Product, Sale, Payment, LedgerEntry } from '../types';
 
 const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || '';

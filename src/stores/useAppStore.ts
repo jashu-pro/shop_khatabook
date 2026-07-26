@@ -592,14 +592,6 @@ export const useAppStore = create<AppState>()(
 
     syncPaymentToCloud(newPayment);
     syncLedgerToCloud(newLedgerEntry);
-      description: `Payment Received via ${paymentData.method.replace('_', ' ')}`,
-      entry_date: newPayment.created_at,
-      created_at: newPayment.created_at
-    };
-
-    const updatedCustomers = state.customers.map((c: Customer) => 
-      c.id === paymentData.customer_id ? { ...c, last_payment_date: newPayment.created_at } : c
-    );
 
     set((s: AppState) => ({
       payments: [newPayment, ...s.payments],
