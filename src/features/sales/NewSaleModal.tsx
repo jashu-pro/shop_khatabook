@@ -80,6 +80,10 @@ export const NewSaleModal: React.FC<{ onClose: () => void; initialCustomerId?: s
         .map(i => `• ${i.item_name} (x${i.quantity}) — Rs. ${(i.unit_price * i.quantity).toLocaleString('en-IN')}`)
         .join('\n');
 
+      const upiId = shop?.upi_id || 'srilaxmi@ybl';
+      const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(shopName)}` + (newTotalBalance > 0 ? `&am=${newTotalBalance.toFixed(2)}&cu=INR` : '&cu=INR') + `&tn=${encodeURIComponent(`Bill Payment for ${customer.name}`)}`;
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiUri)}`;
+
       const whatsappText = 
         `🙏 *${shopName.toUpperCase()}*\n` +
         `*New Bill & Khatta Entry Saved*\n\n` +
@@ -89,7 +93,9 @@ export const NewSaleModal: React.FC<{ onClose: () => void; initialCustomerId?: s
         (parseFloat(amountPaid) > 0 ? `💵 *Cash Paid*: Rs. ${parseFloat(amountPaid).toLocaleString('en-IN')}\n` : '') +
         `🔴 *Udhaar Added*: Rs. ${balanceDue.toLocaleString('en-IN')}\n` +
         `💰 *Total Outstanding Balance*: Rs. ${newTotalBalance.toLocaleString('en-IN')}\n\n` +
-        `💳 *Pay via UPI*: upi://pay?pa=${shop?.upi_id || 'srilaxmi@ybl'}&pn=${encodeURIComponent(shopName)}\n\n` +
+        `💳 *UPI ID*: ${upiId}\n` +
+        `📲 *One-Tap Pay*: ${upiUri}\n` +
+        `📷 *Scan Payment QR Code*: ${qrImageUrl}\n\n` +
         `Thank you for your business!`;
 
       const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(whatsappText)}`;

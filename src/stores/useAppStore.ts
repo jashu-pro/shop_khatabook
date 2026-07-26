@@ -616,10 +616,25 @@ export const useAppStore = create<AppState>()(
     const custLedger = state.ledgerEntries.filter((l: LedgerEntry) => l.customer_id === customerId);
     const balance = custLedger.length > 0 ? custLedger[custLedger.length - 1].running_balance : 0;
 
-    const message = `Namaste ${customer.name} ji,\nThis is a friendly reminder from ${state.shop?.name || 'Sri Laxmi Traders'}. Your outstanding Khatta balance is ₹${balance.toLocaleString('en-IN')}.\nPay instantly via UPI ID: ${state.shop?.upi_id || 'srilaxmi@ybl'}.\nThank you!`;
+    const upiId = state.shop?.upi_id || 'srilaxmi@ybl';
+    const shopName = state.shop?.name || 'Sri Laxmi Traders';
+    const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(shopName)}` + (balance > 0 ? `&am=${balance.toFixed(2)}&cu=INR` : '&cu=INR') + `&tn=${encodeURIComponent(`Khatta Payment for ${customer.name}`)}`;
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiUri)}`;
+
+    const message = 
+      `🙏 *${shopName.toUpperCase()}*\n` +
+      `*Khatta Payment Reminder*\n\n` +
+      `Namaste *${customer.name}* ji,\n` +
+      `This is a friendly reminder. Your outstanding Khatta balance is *₹${balance.toLocaleString('en-IN')}*.\n\n` +
+      `💳 *UPI ID*: ${upiId}\n` +
+      `📲 *One-Tap Pay*: ${upiUri}\n` +
+      `📷 *Scan Payment QR Code*: ${qrImageUrl}\n\n` +
+      `Thank you!`;
     
+    const cleanPhone = customer.phone.replace(/\D/g, '');
+    const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/91${customer.phone}?text=${encodedMessage}`, '_blank');
+    window.open(`https://wa.me/${formattedPhone}?text=${encodedMessage}`, '_blank');
   },
 
   // AI Voice Assistant & Human-in-the-Loop Confirmation

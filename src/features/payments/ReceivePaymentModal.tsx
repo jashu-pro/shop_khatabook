@@ -40,6 +40,10 @@ export const ReceivePaymentModal: React.FC<{ onClose: () => void; initialCustome
       const shopName = shop?.name || 'Sri Laxmi Traders';
       const remainingBalance = Math.max(0, currentBalance - paidAmt);
 
+      const upiId = shop?.upi_id || 'srilaxmi@ybl';
+      const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(shopName)}` + (remainingBalance > 0 ? `&am=${remainingBalance.toFixed(2)}&cu=INR` : '&cu=INR') + `&tn=${encodeURIComponent(`Balance Payment for ${customer.name}`)}`;
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiUri)}`;
+
       const whatsappText = 
         `🙏 *${shopName.toUpperCase()}*\n` +
         `*Payment Received Receipt*\n\n` +
@@ -47,6 +51,8 @@ export const ReceivePaymentModal: React.FC<{ onClose: () => void; initialCustome
         `Thank you! We have received a payment of *Rs. ${paidAmt.toLocaleString('en-IN')}* via ${method.replace('_', ' ')}.\n\n` +
         `🟢 *Payment Received*: Rs. ${paidAmt.toLocaleString('en-IN')}\n` +
         `💰 *Remaining Khatta Balance*: Rs. ${remainingBalance.toLocaleString('en-IN')}\n\n` +
+        `💳 *UPI ID*: ${upiId}\n` +
+        (remainingBalance > 0 ? `📷 *Scan Remaining QR*: ${qrImageUrl}\n\n` : '') +
         `Thank you for clearing your bill on time!`;
 
       const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(whatsappText)}`;
