@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import { LiveCameraModal } from '../../components/common/LiveCameraModal';
+import { SearchableCustomerSelect } from '../../components/common/SearchableCustomerSelect';
 import { Trash2, Camera, CheckCircle2, ShoppingBag, Image as ImageIcon, X, Upload, Send } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -124,21 +125,12 @@ export const NewSaleModal: React.FC<{ onClose: () => void; initialCustomerId?: s
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Customer Selector */}
-          <div>
-            <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: 4, display: 'block' }}>Select Customer *</label>
-            <select
-              className="input-field"
-              value={selectedCustomerId}
-              onChange={(e) => setSelectedCustomerId(e.target.value)}
-              required
-            >
-              {customers.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.village}) — Phone: {c.phone}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Searchable Customer Selector */}
+          <SearchableCustomerSelect
+            selectedCustomerId={selectedCustomerId}
+            onSelectCustomer={(id) => setSelectedCustomerId(id)}
+            label="Select Customer *"
+          />
 
           {/* Line Items */}
           <div>

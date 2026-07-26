@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import type { PaymentMethod } from '../../types';
 import { UpiQrModal } from '../../components/common/UpiQrModal';
+import { SearchableCustomerSelect } from '../../components/common/SearchableCustomerSelect';
 import { CheckCircle2, ArrowDownLeft, Send, QrCode } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -80,25 +81,12 @@ export const ReceivePaymentModal: React.FC<{ onClose: () => void; initialCustome
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div>
-            <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: 4, display: 'block' }}>Select Customer *</label>
-            <select
-              className="input-field"
-              value={selectedCustomerId}
-              onChange={(e) => setSelectedCustomerId(e.target.value)}
-              required
-            >
-              {customers.map(c => {
-                const cLedger = ledgerEntries.filter(l => l.customer_id === c.id);
-                const bal = cLedger.length > 0 ? cLedger[cLedger.length - 1].running_balance : 0;
-                return (
-                  <option key={c.id} value={c.id}>
-                    {c.name} ({c.village}) — Owed: ₹{bal.toLocaleString('en-IN')}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+          {/* Searchable Customer Selector */}
+          <SearchableCustomerSelect
+            selectedCustomerId={selectedCustomerId}
+            onSelectCustomer={(id) => setSelectedCustomerId(id)}
+            label="Select Customer *"
+          />
 
           <div style={{ background: 'var(--debt-50)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--debt-100)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAppStore } from '../../stores/useAppStore';
+import { SearchableCustomerSelect } from './SearchableCustomerSelect';
 import { QrCode, Download, Edit3, Check, Copy, X, Printer } from 'lucide-react';
 import type { Customer } from '../../types';
 
@@ -151,22 +152,12 @@ export const UpiQrModal: React.FC<UpiQrModalProps> = ({
           {/* Customer & Amount Selection */}
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 8 }}>
             <div>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
-                SELECT CUSTOMER (OPTIONAL)
-              </label>
-              <select
-                className="input-field"
-                value={selectedCustId}
-                onChange={(e) => handleCustomerSelect(e.target.value)}
-                style={{ padding: '6px 8px', fontSize: '12px' }}
-              >
-                <option value="">-- General Payment --</option>
-                {customers.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} ({c.village}) - ₹{getCustBalance(c.id)}
-                  </option>
-                ))}
-              </select>
+              <SearchableCustomerSelect
+                selectedCustomerId={selectedCustId}
+                onSelectCustomer={(id) => handleCustomerSelect(id)}
+                label="SELECT CUSTOMER (OPTIONAL)"
+                placeholder="Search by name, village..."
+              />
             </div>
 
             <div>
