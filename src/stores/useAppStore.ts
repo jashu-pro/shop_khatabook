@@ -4,6 +4,13 @@ import type {
   UserProfile, Shop, ShopUser, Customer, Product, Category, StockMovement, 
   Sale, Payment, LedgerEntry, NotificationLog, AuditLog, AIRequestLog, ActiveTab 
 } from '../types';
+import { 
+  syncCustomerToCloud, 
+  syncProductToCloud, 
+  syncSaleToCloud, 
+  syncPaymentToCloud, 
+  syncLedgerToCloud 
+} from '../services/supabase';
 
 interface AppState {
   // Navigation & Theme
@@ -389,6 +396,8 @@ export const useAppStore = create<AppState>()(
           created_at: new Date().toISOString()
         };
 
+        syncCustomerToCloud(newCust);
+
         if (openingBalance && openingBalance.amount > 0) {
           const isDebit = openingBalance.type === 'DEBIT';
           const initialLedger: LedgerEntry = {
@@ -404,6 +413,7 @@ export const useAppStore = create<AppState>()(
             entry_date: new Date().toISOString(),
             created_at: new Date().toISOString()
           };
+          syncLedgerToCloud(initialLedger);
           set((s: AppState) => ({
             customers: [newCust, ...s.customers],
             ledgerEntries: [...s.ledgerEntries, initialLedger]
@@ -414,12 +424,28 @@ export const useAppStore = create<AppState>()(
 
         return { success: true };
       },
-  updateCustomer: (id: string, updated: Partial<Customer>) => set((state: AppState) => ({
-    customers: state.customers.map((c: Customer) => c.id === id ? { ...c, ...updated } : c)
-  })),
-  deleteCustomer: (id: string) => set((state: AppState) => ({
-    customers: state.customers.map((c: Customer) => c.id === id ? { ...c, is_deleted: true, deleted_at: new Date().toISOString() } : c)
-  })),
+  updateCustomer: (id: string, updated: Partial<Customer>) => set((state: AppState) => {
+    const updatedCustomers = state.customers.map((c: Customer) => {
+      if (c.id === id) {
+        const merged = { ...c, ...updated };
+        syncCustomerToCloud(merged);
+        return merged;
+      }
+      return c;
+    });
+    return { customers: updatedCustomers };
+  }),
+  deleteCustomer: (id: string) => set((state: AppState) => {
+    const updatedCustomers = state.customers.map((c: Customer) => {
+      if (c.id === id) {
+        const deleted = { ...c, is_deleted: true, deleted_at: new Date().toISOString() };
+        syncCustomerToCloud(deleted);
+        return deleted;
+      }
+      return c;
+    });
+    return { customers: updatedCustomers };
+  }),
 
   // Inventory Management
   categories: [
@@ -431,12 +457,22 @@ export const useAppStore = create<AppState>()(
   ],
   products: INITIAL_PRODUCTS,
   stockMovements: [],
-  addProduct: (product: Omit<Product, 'id' | 'created_at'>) => set((state: AppState) => ({
-    products: [{ ...product, id: 'prod-' + Date.now(), created_at: new Date().toISOString() }, ...state.products]
-  })),
-  updateProduct: (id: string, updated: Partial<Product>) => set((state: AppState) => ({
-    products: state.products.map((p: Product) => p.id === id ? { ...p, ...updated } : p)
-  })),
+  addProduct: (productData: Omit<Product, 'id' | 'created_at'>) => {
+    const newProduct: Product = { ...productData, id: 'prod-' + Date.now(), created_at: new Date().toISOString() };
+    syncProductToCloud(newProduct);
+    set((state: AppState) => ({ products: [newProduct, ...state.products] }));
+  },
+  updateProduct: (id: string, updated: Partial<Product>) => set((state: AppState) => {
+    const updatedProducts = state.products.map((p: Product) => {
+      if (p.id === id) {
+        const merged = { ...p, ...updated };
+        syncProductToCloud(merged);
+        return merged;
+      }
+      return p;
+    });
+    return { products: updatedProducts };
+  }),
 
   // Credit Sales & Line Item Billing
   sales: INITIAL_SALES,
@@ -500,6 +536,9 @@ export const useAppStore = create<AppState>()(
       return p;
     });
 
+    syncSaleToCloud(newSale);
+    syncLedgerToCloud(newLedgerEntry);
+
     set((s: AppState) => ({
       sales: [newSale, ...s.sales],
       ledgerEntries: [...s.ledgerEntries, newLedgerEntry],
@@ -542,6 +581,17 @@ export const useAppStore = create<AppState>()(
       debit: 0,
       credit: paymentData.amount,
       running_balance: newRunningBalance,
+      description: `Payment Received via ${paymentData.method.replace('_', ' ')}`,
+      entry_date: newPayment.created_at,
+      created_at: newPayment.created_at
+    };
+
+    const updatedCustomers = state.customers.map((c: Customer) => 
+      c.id === paymentData.customer_id ? { ...c, last_payment_date: newPayment.created_at } : c
+    );
+
+    syncPaymentToCloud(newPayment);
+    syncLedgerToCloud(newLedgerEntry);
       description: `Payment Received via ${paymentData.method.replace('_', ' ')}`,
       entry_date: newPayment.created_at,
       created_at: newPayment.created_at
