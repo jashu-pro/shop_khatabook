@@ -5,8 +5,8 @@ import { EditCustomerModal } from './EditCustomerModal';
 import { UpiQrModal } from '../../components/common/UpiQrModal';
 import { downloadSingleCustomerPDF, downloadAllCustomersSummaryPDF } from '../../services/pdfService';
 import { 
-  Search, Phone, Plus, QrCode,
-  MapPin, Send, Trash2, Pencil, Receipt, CreditCard, FileText, ChevronRight, X
+  Search, Phone, Plus, QrCode, Send, Pencil, 
+  Receipt, CreditCard, FileText, ChevronRight, X
 } from 'lucide-react';
 
 export const CustomerView: React.FC<{
@@ -14,7 +14,7 @@ export const CustomerView: React.FC<{
   onOpenNewSale?: (customerId?: string) => void;
   onOpenReceivePayment?: (customerId?: string) => void;
 }> = ({ onOpenAddCustomer, onOpenNewSale, onOpenReceivePayment }) => {
-  const { customers, sales, ledgerEntries, shop, sendWhatsAppReminder, deleteCustomer, updateCustomer } = useAppStore();
+  const { customers, sales, ledgerEntries, shop, sendWhatsAppReminder, updateCustomer } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('ALL');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -68,7 +68,7 @@ export const CustomerView: React.FC<{
 
   return (
     <div>
-      {/* Search, Export & Add Header */}
+      {/* Search Bar & Export Buttons Header */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
           <Search size={18} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
@@ -112,7 +112,7 @@ export const CustomerView: React.FC<{
 
       {/* Tag Filters */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
-        {['ALL', 'VIP', 'Regular', 'Risk'].map(tag => (
+        {['ALL', 'VIP', 'Regular', 'Risk', 'New'].map(tag => (
           <button
             key={tag}
             onClick={() => setSelectedTag(tag)}
@@ -134,11 +134,10 @@ export const CustomerView: React.FC<{
         ))}
       </div>
 
-      {/* Clean Mobile Customer Card List (Inspired by Screenshot 2) */}
+      {/* Mobile Customer Cards List (Exact Screenshot 2 Design) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {filteredCustomers.map(customer => {
           const balance = getCustomerBalance(customer.id);
-          const limitUsage = Math.min(100, Math.round((balance / customer.credit_limit) * 100));
           const avatarTheme = getAvatarTheme(customer.name);
           const primaryTag = customer.tags[0] || 'Regular';
           const badgeStyle = getTagBadgeStyle(primaryTag);
@@ -147,24 +146,26 @@ export const CustomerView: React.FC<{
           return (
             <div
               key={customer.id}
+              onClick={() => setSelectedCustomer(customer)}
               style={{
                 background: 'var(--bg-card)',
                 borderRadius: '20px',
-                padding: '16px',
+                padding: '18px 20px',
                 border: '1px solid var(--border-light)',
-                boxShadow: 'var(--shadow-sm)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 12
+                gap: 14,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
               }}
             >
-              {/* Top Row: Initials Avatar + Name & Village + Status Badge */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  {/* Initials Badge or Avatar */}
+              {/* Top Row: Initials Avatar + Name/Subtitle + Status Tag */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{
-                    width: 48,
-                    height: 48,
+                    width: 46,
+                    height: 46,
                     borderRadius: '14px',
                     background: avatarTheme.bg,
                     color: avatarTheme.color,
@@ -174,32 +175,26 @@ export const CustomerView: React.FC<{
                     justifyContent: 'center',
                     fontSize: '16px',
                     fontWeight: 800,
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
                     flexShrink: 0
                   }}>
                     {getInitials(customer.name)}
                   </div>
 
                   <div>
-                    <h3 
-                      onClick={() => setSelectedCustomer(customer)}
-                      style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', cursor: 'pointer' }}
-                    >
+                    <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)', margin: 0, lineHeight: 1.2 }}>
                       {customer.name}
                     </h3>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                      <MapPin size={12} color="var(--khatta-600)" />
-                      {customer.village}
-                    </div>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                      {customer.village || 'Local Residence'}
+                    </p>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                  {/* Status Pill */}
                   <div style={{
                     background: badgeStyle.bg,
                     color: badgeStyle.color,
-                    padding: '3px 10px',
+                    padding: '3px 12px',
                     borderRadius: '9999px',
                     fontSize: '11px',
                     fontWeight: 800,
@@ -211,182 +206,68 @@ export const CustomerView: React.FC<{
                     {primaryTag.toUpperCase()}
                   </div>
 
-                  {/* Ledger Debt Amount */}
-                  <div style={{ fontSize: '17px', fontWeight: 900, color: balance > 0 ? 'var(--debt-600)' : 'var(--khatta-600)' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 900, color: balance > 0 ? 'var(--debt-600)' : 'var(--khatta-600)' }}>
                     ₹{balance.toLocaleString('en-IN')}
                   </div>
                 </div>
               </div>
 
-              {/* Middle Row: Formatted Mobile Number, Timestamp & Quick Action Round Buttons */}
-              <div style={{
-                background: 'var(--border-subtle)',
-                borderRadius: '14px',
-                padding: '10px 14px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
+              {/* Horizontal Divider Line */}
+              <div style={{ height: '1px', background: 'var(--border-subtle)' }} />
+
+              {/* Bottom Row: Phone Number, Date & Quick Outline Action Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <div>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'sans-serif' }}>
+                  <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'sans-serif' }}>
                     +91 {customer.phone.replace(/^(\d{5})(\d{5})$/, '$1 $2')}
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: 2 }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: 4 }}>
                     {createdDateFormatted}
                   </div>
                 </div>
 
-                {/* Round Icon Action Buttons (Call, WhatsApp, QR, Detail Arrow) */}
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {/* 3 Outline Icon Action Buttons (Call, WhatsApp, Chevron >) */}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
                   <a
                     href={`tel:${customer.phone}`}
                     style={{
-                      width: 34, height: 34, borderRadius: '10px',
+                      width: 38, height: 38, borderRadius: '12px',
                       background: 'var(--bg-card)', color: 'var(--text-main)',
-                      border: '1px solid var(--border-light)',
+                      border: '1.5px solid var(--border-light)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       textDecoration: 'none'
                     }}
                     title="Call Phone"
                   >
-                    <Phone size={15} />
+                    <Phone size={17} />
                   </a>
 
                   <button
+                    type="button"
                     onClick={() => sendWhatsAppReminder(customer.id)}
                     style={{
-                      width: 34, height: 34, borderRadius: '10px',
-                      background: '#dcfce7', color: '#16a34a',
-                      border: 'none', cursor: 'pointer',
+                      width: 38, height: 38, borderRadius: '12px',
+                      background: 'var(--bg-card)', color: 'var(--text-main)',
+                      border: '1.5px solid var(--border-light)', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}
                     title="WhatsApp Statement & QR"
                   >
-                    <Send size={15} />
+                    <Send size={17} />
                   </button>
 
                   <button
-                    onClick={() => setQrCustomer(customer)}
-                    style={{
-                      width: 34, height: 34, borderRadius: '10px',
-                      background: 'var(--khatta-50)', color: 'var(--khatta-600)',
-                      border: 'none', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}
-                    title="UPI QR Code"
-                  >
-                    <QrCode size={15} />
-                  </button>
-
-                  <button
+                    type="button"
                     onClick={() => setSelectedCustomer(customer)}
                     style={{
-                      width: 34, height: 34, borderRadius: '10px',
+                      width: 38, height: 38, borderRadius: '12px',
                       background: 'var(--bg-card)', color: 'var(--text-main)',
-                      border: '1px solid var(--border-light)', cursor: 'pointer',
+                      border: '1.5px solid var(--border-light)', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}
-                    title="View Customer Details & Passbook"
+                    title="Open Full Customer Profile Details"
                   >
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Progress Bar & Primary Action Buttons */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', fontWeight: 700, marginBottom: 4 }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Limit usage: {limitUsage}%</span>
-                  <span style={{ color: 'var(--text-muted)' }}>Max Limit: ₹{customer.credit_limit.toLocaleString('en-IN')}</span>
-                </div>
-                <div style={{ background: 'var(--border-subtle)', borderRadius: '9999px', height: 6, overflow: 'hidden', marginBottom: 10 }}>
-                  <div
-                    style={{
-                      height: '100%',
-                      width: `${limitUsage}%`,
-                      background: limitUsage > 80 ? 'var(--debt-600)' : 'var(--khatta-500)',
-                      borderRadius: '9999px'
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={() => onOpenNewSale?.(customer.id)}
-                    style={{
-                      flex: 1,
-                      padding: '10px',
-                      borderRadius: '12px',
-                      background: '#6366f1',
-                      color: 'white',
-                      border: 'none',
-                      fontWeight: 700,
-                      fontSize: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Receipt size={15} />
-                    New Bill (Debit)
-                  </button>
-
-                  <button
-                    onClick={() => onOpenReceivePayment?.(customer.id)}
-                    style={{
-                      flex: 1,
-                      padding: '10px',
-                      borderRadius: '12px',
-                      background: '#059669',
-                      color: 'white',
-                      border: 'none',
-                      fontWeight: 700,
-                      fontSize: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <CreditCard size={15} />
-                    Collect Payment
-                  </button>
-
-                  <button
-                    onClick={() => setEditingCustomer(customer)}
-                    style={{
-                      padding: '10px',
-                      borderRadius: '12px',
-                      background: 'var(--bg-card-hover)',
-                      border: '1px solid var(--border-light)',
-                      color: 'var(--text-main)',
-                      cursor: 'pointer'
-                    }}
-                    title="Edit Customer Details"
-                  >
-                    <Pencil size={15} />
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      if (confirm(`Delete customer ${customer.name}?`)) {
-                        deleteCustomer(customer.id);
-                      }
-                    }}
-                    style={{
-                      padding: '10px',
-                      borderRadius: '12px',
-                      background: 'var(--bg-card-hover)',
-                      border: '1px solid var(--border-light)',
-                      color: 'var(--debt-600)',
-                      cursor: 'pointer'
-                    }}
-                    title="Delete Customer"
-                  >
-                    <Trash2 size={15} />
+                    <ChevronRight size={18} />
                   </button>
                 </div>
               </div>
@@ -396,32 +277,32 @@ export const CustomerView: React.FC<{
         })}
       </div>
 
-      {/* Customer Details & Bahi Ledger Drawer Modal (Inspired by Screenshot 3) */}
+      {/* Comprehensive Customer Profile Drawer Modal (Exact Screenshot 3 Design) */}
       {selectedCustomer && (
         <div className="modal-overlay" onClick={() => setSelectedCustomer(null)}>
-          <div className="modal-sheet" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px', padding: '22px' }}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', padding: '24px' }}>
             
-            {/* Top Close Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Top Close & Initials Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <div style={{
-                  width: 52, height: 52, borderRadius: '16px',
+                  width: 56, height: 56, borderRadius: '16px',
                   background: getAvatarTheme(selectedCustomer.name).bg,
                   color: getAvatarTheme(selectedCustomer.name).color,
                   border: `1.5px solid ${getAvatarTheme(selectedCustomer.name).border}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '18px', fontWeight: 900
+                  fontSize: '20px', fontWeight: 900
                 }}>
                   {getInitials(selectedCustomer.name)}
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{selectedCustomer.name}</h2>
+                  <h2 style={{ fontSize: '22px', fontWeight: 800, margin: 0 }}>{selectedCustomer.name}</h2>
                   <div style={{ marginTop: 4 }}>
                     <select
                       value={selectedCustomer.tags[0] || 'Regular'}
                       onChange={(e) => updateCustomer(selectedCustomer.id, { tags: [e.target.value as CustomerTag] })}
                       style={{
-                        padding: '2px 8px',
+                        padding: '3px 10px',
                         borderRadius: '9999px',
                         fontSize: '11px',
                         fontWeight: 800,
@@ -431,152 +312,174 @@ export const CustomerView: React.FC<{
                         cursor: 'pointer'
                       }}
                     >
+                      <option value="New">• NEW</option>
                       <option value="Regular">• REGULAR</option>
                       <option value="VIP">• VIP CUSTOMER</option>
                       <option value="Risk">• HIGH RISK</option>
-                      <option value="New">• NEW</option>
                     </select>
                   </div>
                 </div>
               </div>
 
               <button onClick={() => setSelectedCustomer(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                <X size={22} />
+                <X size={24} />
               </button>
             </div>
 
-            {/* Quick Dual Call & WhatsApp Buttons (Screenshot 3 style) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+            {/* Quick Dual Call & WhatsApp Buttons (Exact Screenshot 3 style) */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
               <a
                 href={`tel:${selectedCustomer.phone}`}
                 style={{
-                  padding: '12px',
-                  borderRadius: '14px',
+                  padding: '14px',
+                  borderRadius: '16px',
                   background: 'var(--bg-card)',
-                  border: '1px solid var(--border-light)',
+                  border: '1.5px solid var(--border-light)',
                   color: 'var(--text-main)',
                   fontWeight: 800,
-                  fontSize: '13px',
+                  fontSize: '14px',
                   textDecoration: 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 8,
+                  gap: 10,
                   boxShadow: 'var(--shadow-sm)'
                 }}
               >
-                <Phone size={17} /> Call
+                <Phone size={18} /> Call
               </a>
 
               <button
                 type="button"
                 onClick={() => sendWhatsAppReminder(selectedCustomer.id)}
                 style={{
-                  padding: '12px',
-                  borderRadius: '14px',
+                  padding: '14px',
+                  borderRadius: '16px',
                   background: '#dcfce7',
-                  border: '1px solid #bbf7d0',
+                  border: '1.5px solid #bbf7d0',
                   color: '#15803d',
                   fontWeight: 800,
-                  fontSize: '13px',
+                  fontSize: '14px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 8,
+                  gap: 10,
                   boxShadow: 'var(--shadow-sm)'
                 }}
               >
-                <Send size={17} /> WhatsApp
+                <Send size={18} /> WhatsApp
               </button>
             </div>
 
-            {/* Details Box Card (Screenshot 3 style) */}
+            {/* DETAILS Box (Exact Screenshot 3 style with EVERY detail) */}
             <div style={{
               background: 'var(--border-subtle)',
-              borderRadius: '16px',
-              padding: '16px',
-              marginBottom: 16,
+              borderRadius: '18px',
+              padding: '18px',
+              marginBottom: 20,
               display: 'flex',
               flexDirection: 'column',
-              gap: 10
+              gap: 12
             }}>
-              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.8px' }}>
-                CUSTOMER DETAILS
+              <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px' }}>
+                DETAILS
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Customer Name</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Owner / Customer Name</span>
                 <strong style={{ color: 'var(--text-main)' }}>{selectedCustomer.name}</strong>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Village / Location</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Village / Residence</span>
                 <strong style={{ color: 'var(--text-main)' }}>{selectedCustomer.village}</strong>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Phone Number</span>
                 <strong style={{ color: 'var(--text-main)' }}>+91 {selectedCustomer.phone}</strong>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Credit Limit</span>
+                <strong style={{ color: 'var(--text-main)' }}>₹{selectedCustomer.credit_limit.toLocaleString('en-IN')}</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Credit Risk Score</span>
+                <strong style={{ color: '#16a34a' }}>{selectedCustomer.credit_score || 750} / 850 (Low Risk)</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Current Khatta Balance</span>
-                <strong style={{ color: getCustomerBalance(selectedCustomer.id) > 0 ? 'var(--debt-600)' : 'var(--khatta-600)', fontSize: '15px' }}>
+                <strong style={{ color: getCustomerBalance(selectedCustomer.id) > 0 ? 'var(--debt-600)' : 'var(--khatta-600)', fontSize: '16px' }}>
                   ₹{getCustomerBalance(selectedCustomer.id).toLocaleString('en-IN')}
                 </strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Account Created Date</span>
+                <strong style={{ color: 'var(--text-main)' }}>{new Date(selectedCustomer.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</strong>
               </div>
             </div>
 
             {/* Bahi Ledger Passbook Notebook Container */}
-            <div className="notebook-container" style={{ maxHeight: '220px', overflowY: 'auto' }}>
-              <div className="notebook-header">
-                <span>Date & Details</span>
-                <span>Jama (Paid)</span>
-                <span>Udhaar (Owed)</span>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+                <span>BAHI LEDGER NOTEBOOK</span>
+                <span>{ledgerEntries.filter(l => l.customer_id === selectedCustomer.id).length} Entries</span>
               </div>
 
-              {ledgerEntries.filter(l => l.customer_id === selectedCustomer.id).map(entry => {
-                const linkedSale = sales.find(s => s.id === entry.sale_id);
-                const photoUrl = linkedSale?.bill_photo_url;
+              <div className="notebook-container" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                <div className="notebook-header">
+                  <span>Date & Details</span>
+                  <span>Jama (Paid)</span>
+                  <span>Udhaar (Owed)</span>
+                </div>
 
-                return (
-                  <div key={entry.id} className="notebook-row">
-                    <div>
-                      <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {entry.description}
-                        {photoUrl && (
-                          <span 
-                            style={{
-                              fontSize: '10px',
-                              background: '#dcfce7',
-                              color: '#16a34a',
-                              padding: '1px 6px',
-                              borderRadius: '4px',
-                              fontWeight: 700
-                            }}
-                          >
-                            📷 Photo Proof Saved
-                          </span>
-                        )}
+                {ledgerEntries.filter(l => l.customer_id === selectedCustomer.id).map(entry => {
+                  const linkedSale = sales.find(s => s.id === entry.sale_id);
+                  const photoUrl = linkedSale?.bill_photo_url;
+
+                  return (
+                    <div key={entry.id} className="notebook-row">
+                      <div>
+                        <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {entry.description}
+                          {photoUrl && (
+                            <span 
+                              style={{
+                                fontSize: '10px',
+                                background: '#dcfce7',
+                                color: '#16a34a',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                                fontWeight: 700
+                              }}
+                            >
+                              📷 Photo Proof
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                          {new Date(entry.entry_date).toLocaleDateString('en-IN')}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                        {new Date(entry.entry_date).toLocaleDateString('en-IN')}
+                      <div className="jama-green">
+                        {entry.credit > 0 ? `₹${entry.credit}` : '-'}
+                      </div>
+                      <div className="udhaar-red">
+                        {entry.debit > 0 ? `₹${entry.debit}` : '-'}
                       </div>
                     </div>
-                    <div className="jama-green">
-                      {entry.credit > 0 ? `₹${entry.credit}` : '-'}
-                    </div>
-                    <div className="udhaar-red">
-                      {entry.debit > 0 ? `₹${entry.debit}` : '-'}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
 
             {/* Action Bar */}
-            <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
               <button 
                 className="btn-primary" 
                 onClick={() => {
@@ -591,11 +494,48 @@ export const CustomerView: React.FC<{
 
               <button 
                 className="btn-secondary" 
-                onClick={() => downloadSingleCustomerPDF(selectedCustomer, ledgerEntries, shop)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 700 }}
+                onClick={() => {
+                  const custId = selectedCustomer.id;
+                  setSelectedCustomer(null);
+                  onOpenReceivePayment?.(custId);
+                }}
+                style={{ background: '#059669', color: 'white', border: 'none' }}
               >
-                <FileText size={16} color="var(--khatta-600)" />
-                Download PDF
+                <CreditCard size={16} />
+                Collect Payment
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <button 
+                className="btn-secondary" 
+                onClick={() => setQrCustomer(selectedCustomer)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 700, fontSize: '11px', padding: '8px' }}
+              >
+                <QrCode size={14} color="var(--khatta-600)" />
+                UPI QR Code
+              </button>
+
+              <button 
+                className="btn-secondary" 
+                onClick={() => downloadSingleCustomerPDF(selectedCustomer, ledgerEntries, shop)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 700, fontSize: '11px', padding: '8px' }}
+              >
+                <FileText size={14} color="var(--khatta-600)" />
+                PDF Passbook
+              </button>
+
+              <button 
+                className="btn-secondary" 
+                onClick={() => {
+                  const cust = selectedCustomer;
+                  setSelectedCustomer(null);
+                  setEditingCustomer(cust);
+                }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 700, fontSize: '11px', padding: '8px' }}
+              >
+                <Pencil size={14} />
+                Edit Info
               </button>
             </div>
 
