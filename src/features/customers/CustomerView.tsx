@@ -85,26 +85,27 @@ export const CustomerView: React.FC<{
         <button 
           onClick={() => downloadAllCustomersSummaryPDF(customers, ledgerEntries, shop)}
           style={{
-            background: 'var(--bg-card)',
-            color: 'var(--text-main)',
-            border: '1px solid var(--border-light)',
-            padding: '0 14px',
-            borderRadius: '12px',
-            fontSize: '12px',
-            fontWeight: 700,
+            background: 'var(--khatta-50)',
+            color: 'var(--khatta-700)',
+            border: '1.5px solid var(--khatta-300)',
+            padding: '10px 16px',
+            borderRadius: '14px',
+            fontSize: '13.5px',
+            fontWeight: 800,
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
+            gap: 8,
             cursor: 'pointer',
-            boxShadow: 'var(--shadow-sm)'
+            boxShadow: 'var(--shadow-sm)',
+            whiteSpace: 'nowrap'
           }}
           title={`Export PDF Passbook for All ${customers.length} Customers`}
         >
-          <FileText size={16} color="var(--khatta-600)" />
-          All Customers PDF ({customers.length})
+          <FileText size={18} color="var(--khatta-600)" />
+          Download All Customers PDF ({customers.length})
         </button>
 
-        <button className="btn-primary" onClick={onOpenAddCustomer} style={{ width: 'auto', padding: '0 16px', borderRadius: '12px' }}>
+        <button className="btn-primary" onClick={onOpenAddCustomer} style={{ width: 'auto', padding: '10px 18px', borderRadius: '14px', fontSize: '13.5px', fontWeight: 800 }}>
           <Plus size={18} />
           Add Customer
         </button>
@@ -218,10 +219,10 @@ export const CustomerView: React.FC<{
               {/* Bottom Row: Phone Number, Date & Quick Outline Action Buttons */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <div>
-                  <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'sans-serif' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', fontFamily: 'sans-serif', letterSpacing: '0.2px' }}>
                     +91 {customer.phone.replace(/^(\d{5})(\d{5})$/, '$1 $2')}
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: 4 }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: 2, opacity: 0.8 }}>
                     {createdDateFormatted}
                   </div>
                 </div>
