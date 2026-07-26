@@ -160,6 +160,10 @@ export const SearchableCustomerSelect: React.FC<SearchableCustomerSelectProps> =
                       <img
                         src={customer.photo_url}
                         alt={customer.name}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.name)}&background=dbeafe&color=1e40af&bold=true`;
+                        }}
                         style={{
                           width: 34,
                           height: 34,

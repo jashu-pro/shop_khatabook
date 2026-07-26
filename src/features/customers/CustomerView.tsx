@@ -168,6 +168,10 @@ export const CustomerView: React.FC<{
                     <img
                       src={customer.photo_url}
                       alt={customer.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.name)}&background=dbeafe&color=1e40af&bold=true`;
+                      }}
                       style={{
                         width: 46,
                         height: 46,
@@ -305,6 +309,10 @@ export const CustomerView: React.FC<{
                   <img
                     src={selectedCustomer.photo_url}
                     alt={selectedCustomer.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCustomer.name)}&background=dbeafe&color=1e40af&bold=true`;
+                    }}
                     style={{
                       width: 56,
                       height: 56,
