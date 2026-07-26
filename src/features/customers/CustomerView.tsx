@@ -164,22 +164,37 @@ export const CustomerView: React.FC<{
               {/* Top Row: Initials Avatar + Name/Subtitle + Status Tag */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{
-                    width: 46,
-                    height: 46,
-                    borderRadius: '14px',
-                    background: avatarTheme.bg,
-                    color: avatarTheme.color,
-                    border: `1px solid ${avatarTheme.border}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '16px',
-                    fontWeight: 800,
-                    flexShrink: 0
-                  }}>
-                    {getInitials(customer.name)}
-                  </div>
+                  {customer.photo_url ? (
+                    <img
+                      src={customer.photo_url}
+                      alt={customer.name}
+                      style={{
+                        width: 46,
+                        height: 46,
+                        borderRadius: '14px',
+                        objectFit: 'cover',
+                        border: `1.5px solid ${avatarTheme.border}`,
+                        flexShrink: 0
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: '14px',
+                      background: avatarTheme.bg,
+                      color: avatarTheme.color,
+                      border: `1px solid ${avatarTheme.border}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '16px',
+                      fontWeight: 800,
+                      flexShrink: 0
+                    }}>
+                      {getInitials(customer.name)}
+                    </div>
+                  )}
 
                   <div>
                     <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)', margin: 0, lineHeight: 1.2 }}>
@@ -286,16 +301,31 @@ export const CustomerView: React.FC<{
             {/* Top Close & Initials Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{
-                  width: 56, height: 56, borderRadius: '16px',
-                  background: getAvatarTheme(selectedCustomer.name).bg,
-                  color: getAvatarTheme(selectedCustomer.name).color,
-                  border: `1.5px solid ${getAvatarTheme(selectedCustomer.name).border}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '20px', fontWeight: 900
-                }}>
-                  {getInitials(selectedCustomer.name)}
-                </div>
+                {selectedCustomer.photo_url ? (
+                  <img
+                    src={selectedCustomer.photo_url}
+                    alt={selectedCustomer.name}
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: '16px',
+                      objectFit: 'cover',
+                      border: `2px solid ${getAvatarTheme(selectedCustomer.name).border}`,
+                      flexShrink: 0
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: 56, height: 56, borderRadius: '16px',
+                    background: getAvatarTheme(selectedCustomer.name).bg,
+                    color: getAvatarTheme(selectedCustomer.name).color,
+                    border: `1.5px solid ${getAvatarTheme(selectedCustomer.name).border}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '20px', fontWeight: 900, flexShrink: 0
+                  }}>
+                    {getInitials(selectedCustomer.name)}
+                  </div>
+                )}
                 <div>
                   <h2 style={{ fontSize: '22px', fontWeight: 800, margin: 0 }}>{selectedCustomer.name}</h2>
                   <div style={{ marginTop: 4 }}>

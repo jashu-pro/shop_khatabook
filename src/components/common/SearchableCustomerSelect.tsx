@@ -156,15 +156,31 @@ export const SearchableCustomerSelect: React.FC<SearchableCustomerSelectProps> =
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                      width: 34, height: 34, borderRadius: '10px',
-                      background: isSelected ? 'var(--khatta-600)' : '#f1f5f9',
-                      color: isSelected ? 'white' : '#334155',
-                      fontWeight: 800, fontSize: '12px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>
-                      {getInitials(customer.name)}
-                    </div>
+                    {customer.photo_url ? (
+                      <img
+                        src={customer.photo_url}
+                        alt={customer.name}
+                        style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: '10px',
+                          objectFit: 'cover',
+                          border: '1px solid var(--border-light)',
+                          flexShrink: 0
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: 34, height: 34, borderRadius: '10px',
+                        background: isSelected ? 'var(--khatta-600)' : '#f1f5f9',
+                        color: isSelected ? 'white' : '#334155',
+                        fontWeight: 800, fontSize: '12px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        {getInitials(customer.name)}
+                      </div>
+                    )}
 
                     <div>
                       <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-main)' }}>
