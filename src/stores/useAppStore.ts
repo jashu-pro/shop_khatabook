@@ -483,8 +483,9 @@ export const useAppStore = create<AppState>()(
     const total_amount = subtotal - saleData.discount + saleData.tax;
     const balance_due = total_amount - saleData.amount_paid;
 
+    const saleId = 'sale-' + Date.now();
     const newSale: Sale = {
-      id: 'sale-' + (100 + state.sales.length + 1),
+      id: saleId,
       shop_id: 'shop-1',
       customer_id: saleData.customer_id,
       customer_name: customer?.name || 'Customer',
@@ -499,7 +500,7 @@ export const useAppStore = create<AppState>()(
       notes: saleData.notes,
       items: saleData.items.map((item: { product_id?: string; item_name: string; quantity: number; unit_price: number }, idx: number) => ({
         id: `si-${Date.now()}-${idx}`,
-        sale_id: '',
+        sale_id: saleId,
         product_id: item.product_id,
         item_name: item.item_name,
         quantity: item.quantity,

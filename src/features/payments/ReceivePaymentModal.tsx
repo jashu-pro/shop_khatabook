@@ -5,9 +5,9 @@ import { UpiQrModal } from '../../components/common/UpiQrModal';
 import { CheckCircle2, ArrowDownLeft, Send, QrCode } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export const ReceivePaymentModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+export const ReceivePaymentModal: React.FC<{ onClose: () => void; initialCustomerId?: string }> = ({ onClose, initialCustomerId }) => {
   const { customers, shop, ledgerEntries, receivePayment } = useAppStore();
-  const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id || '');
+  const [selectedCustomerId, setSelectedCustomerId] = useState(initialCustomerId || customers[0]?.id || '');
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<PaymentMethod>('UPI_PHONEPE');
   const [referenceNo, setReferenceNo] = useState('');

@@ -11,8 +11,8 @@ import {
 
 export const CustomerView: React.FC<{
   onOpenAddCustomer: () => void;
-  onOpenNewSale?: () => void;
-  onOpenReceivePayment?: () => void;
+  onOpenNewSale?: (customerId?: string) => void;
+  onOpenReceivePayment?: (customerId?: string) => void;
 }> = ({ onOpenAddCustomer, onOpenNewSale, onOpenReceivePayment }) => {
   const { customers, sales, ledgerEntries, shop, sendWhatsAppReminder, deleteCustomer } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
@@ -352,7 +352,7 @@ export const CustomerView: React.FC<{
 
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button
-                    onClick={onOpenNewSale}
+                    onClick={() => onOpenNewSale?.(customer.id)}
                     style={{
                       flex: 1,
                       padding: '12px',
@@ -375,7 +375,7 @@ export const CustomerView: React.FC<{
                   </button>
 
                   <button
-                    onClick={onOpenReceivePayment}
+                    onClick={() => onOpenReceivePayment?.(customer.id)}
                     style={{
                       flex: 1,
                       padding: '12px',

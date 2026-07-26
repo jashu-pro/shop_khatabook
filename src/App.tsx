@@ -17,21 +17,29 @@ import { syncAllLocalDataToCloud } from './services/supabase';
 export function App() {
   const { activeTab } = useAppStore();
 
-  const [showNewSaleModal, setShowNewSaleModal] = useState(false);
-  const [showReceivePaymentModal, setShowReceivePaymentModal] = useState(false);
+  const [saleCustomerId, setSaleCustomerId] = useState<string | null>(null);
+  const [paymentCustomerId, setPaymentCustomerId] = useState<string | null>(null);
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
 
   useEffect(() => {
     syncAllLocalDataToCloud();
   }, []);
 
+  const handleOpenNewSale = (cId?: string) => {
+    setSaleCustomerId(cId || '');
+  };
+
+  const handleOpenReceivePayment = (cId?: string) => {
+    setPaymentCustomerId(cId || '');
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return (
           <DashboardView
-            onOpenNewSale={() => setShowNewSaleModal(true)}
-            onOpenReceivePayment={() => setShowReceivePaymentModal(true)}
+            onOpenNewSale={handleOpenNewSale}
+            onOpenReceivePayment={handleOpenReceivePayment}
             onOpenAddCustomer={() => setShowAddCustomerModal(true)}
           />
         );
@@ -39,8 +47,8 @@ export function App() {
         return (
           <CustomerView
             onOpenAddCustomer={() => setShowAddCustomerModal(true)}
-            onOpenNewSale={() => setShowNewSaleModal(true)}
-            onOpenReceivePayment={() => setShowReceivePaymentModal(true)}
+            onOpenNewSale={handleOpenNewSale}
+            onOpenReceivePayment={handleOpenReceivePayment}
           />
         );
       case 'ledger':
@@ -52,13 +60,19 @@ export function App() {
       case 'settings':
         return <SettingsView />;
       default:
-        return <DashboardView onOpenNewSale={() => setShowNewSaleModal(true)} onOpenReceivePayment={() => setShowReceivePaymentModal(true)} onOpenAddCustomer={() => setShowAddCustomerModal(true)} />;
+        return (
+          <DashboardView
+            onOpenNewSale={handleOpenNewSale}
+            onOpenReceivePayment={handleOpenReceivePayment}
+            onOpenAddCustomer={() => setShowAddCustomerModal(true)}
+          />
+        );
     }
   };
 
   return (
     <div className="app-viewport">
-      <DesktopSidebar onOpenNewSale={() => setShowNewSaleModal(true)} />
+      <DesktopSidebar onOpenNewSale={() => handleOpenNewSale()} />
 
       <div className="mobile-wrapper">
         <HeaderBar />
@@ -67,11 +81,25 @@ export function App() {
           {renderTabContent()}
         </main>
 
-        <BottomTabBar onOpenNewSale={() => setShowNewSaleModal(true)} />
+        <BottomTabBar onOpenNewSale={() => handleOpenNewSale()} />
 
-        {showNewSaleModal && <NewSaleModal onClose={() => setShowNewSaleModal(false)} />}
-        {showReceivePaymentModal && <ReceivePaymentModal onClose={() => setShowReceivePaymentModal(false)} />}
-        {showAddCustomerModal && <AddCustomerModal onClose={() => setShowAddCustomerModal(false)} />}
+        {saleCustomerId !== null && (
+          <NewSaleModal
+            initialCustomerId={saleCustomerId}
+            onClose={() => setSaleCustomerId(null)}
+          />
+        )}
+        {paymentCustomerId !== null && (
+          <ReceivePaymentModal
+            initialCustomerId={paymentCustomerId}
+            onClose={() => setPaymentCustomerId(null)}
+          />
+        )}
+        {showAddCustomerModal && (
+          <AddCustomerModal
+            onClose={() => setShowAddCustomerModal(false)}
+          />
+        )}
       </div>
     </div>
   );

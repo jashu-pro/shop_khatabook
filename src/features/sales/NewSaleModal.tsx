@@ -4,11 +4,11 @@ import { LiveCameraModal } from '../../components/common/LiveCameraModal';
 import { Trash2, Camera, CheckCircle2, ShoppingBag, Image as ImageIcon, X, Upload, Send } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export const NewSaleModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+export const NewSaleModal: React.FC<{ onClose: () => void; initialCustomerId?: string }> = ({ onClose, initialCustomerId }) => {
   const { customers, shop, ledgerEntries, addCreditSale } = useAppStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id || '');
+  const [selectedCustomerId, setSelectedCustomerId] = useState(initialCustomerId || customers[0]?.id || '');
   const [items, setItems] = useState<Array<{ item_name: string; quantity: number; unit_price: number }>>([
     { item_name: 'General Udhaar Goods', quantity: 1, unit_price: 500 }
   ]);

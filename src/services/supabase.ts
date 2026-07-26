@@ -44,6 +44,47 @@ export const ensureShopExists = async (shopId: string = 'shop-1') => {
   }
 };
 
+// Helper to ensure customer exists in Supabase database before inserting sales/payments (prevents FK errors)
+export const ensureCustomerExists = async (customerId: string, shopId: string = 'shop-1') => {
+  if (!supabase || !customerId) return;
+  try {
+    const { data } = await supabase.from('customers').select('id').eq('id', customerId).maybeSingle();
+    if (!data) {
+      await ensureShopExists(shopId);
+      let custName = 'Customer';
+      let custPhone = '9000000000';
+      let custVillage = 'Local';
+      const rawData = localStorage.getItem('shop-khattabook-storage');
+      if (rawData) {
+        try {
+          const parsed = JSON.parse(rawData);
+          const found = parsed.state?.customers?.find((c: any) => c.id === customerId);
+          if (found) {
+            custName = found.name;
+            custPhone = found.phone;
+            custVillage = found.village;
+          }
+        } catch (e) {}
+      }
+      const { error } = await supabase.from('customers').upsert({
+        id: customerId,
+        shop_id: shopId,
+        name: custName,
+        phone: custPhone,
+        village: custVillage,
+        tags: ['Regular'],
+        credit_limit: 50000,
+        credit_score: 750,
+        is_deleted: false,
+        created_at: new Date().toISOString()
+      });
+      if (error) console.error('ensureCustomerExists insertion error:', error.message);
+    }
+  } catch (err) {
+    console.error('ensureCustomerExists exception:', err);
+  }
+};
+
 // Helper to push customer to Supabase DB
 export const syncCustomerToCloud = async (customer: Customer) => {
   if (!supabase) return;
@@ -105,6 +146,7 @@ export const syncSaleToCloud = async (sale: Sale) => {
   if (!supabase) return;
   try {
     await ensureShopExists(sale.shop_id || 'shop-1');
+    await ensureCustomerExists(sale.customer_id, sale.shop_id || 'shop-1');
     const { error: saleErr } = await supabase.from('sales').upsert({
       id: sale.id,
       shop_id: sale.shop_id || 'shop-1',
@@ -127,7 +169,7 @@ export const syncSaleToCloud = async (sale: Sale) => {
       const dbItems = sale.items.map(item => ({
         id: item.id,
         sale_id: sale.id,
-        product_id: item.product_id || null,
+        product_id: item.product_id ? item.product_id : null,
         item_name: item.item_name,
         quantity: item.quantity || 1,
         unit_price: item.unit_price || 0,
@@ -135,6 +177,7 @@ export const syncSaleToCloud = async (sale: Sale) => {
       }));
       await supabase.from('sale_items').upsert(dbItems);
     }
+    console.log('Successfully synced credit sale & items to Supabase Cloud DB:', sale.id);
   } catch (err) {
     console.error('Supabase sale sync exception:', err);
   }
@@ -145,6 +188,7 @@ export const syncPaymentToCloud = async (payment: Payment) => {
   if (!supabase) return;
   try {
     await ensureShopExists(payment.shop_id || 'shop-1');
+    await ensureCustomerExists(payment.customer_id, payment.shop_id || 'shop-1');
     const { error } = await supabase.from('payments').upsert({
       id: payment.id,
       shop_id: payment.shop_id || 'shop-1',
@@ -170,6 +214,7 @@ export const syncLedgerToCloud = async (entry: LedgerEntry) => {
   if (!supabase) return;
   try {
     await ensureShopExists(entry.shop_id || 'shop-1');
+    await ensureCustomerExists(entry.customer_id, entry.shop_id || 'shop-1');
     const { error } = await supabase.from('ledger_entries').upsert({
       id: entry.id,
       shop_id: entry.shop_id || 'shop-1',
