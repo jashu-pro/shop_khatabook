@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from './stores/useAppStore';
 import { HeaderBar } from './components/layout/HeaderBar';
 import { BottomTabBar } from './components/layout/BottomTabBar';
@@ -12,6 +12,7 @@ import { SettingsView } from './features/settings/SettingsView';
 import { NewSaleModal } from './features/sales/NewSaleModal';
 import { ReceivePaymentModal } from './features/payments/ReceivePaymentModal';
 import { AddCustomerModal } from './features/customers/AddCustomerModal';
+import { syncAllLocalDataToCloud } from './services/supabase';
 
 export function App() {
   const { activeTab } = useAppStore();
@@ -19,6 +20,10 @@ export function App() {
   const [showNewSaleModal, setShowNewSaleModal] = useState(false);
   const [showReceivePaymentModal, setShowReceivePaymentModal] = useState(false);
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+
+  useEffect(() => {
+    syncAllLocalDataToCloud();
+  }, []);
 
   const renderTabContent = () => {
     switch (activeTab) {
