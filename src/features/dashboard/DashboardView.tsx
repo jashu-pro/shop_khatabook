@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
+import { UpiQrModal } from '../../components/common/UpiQrModal';
 import { 
   TrendingUp, Users, ArrowUpRight, ArrowDownLeft, 
   PlusCircle, CreditCard, UserPlus, BookOpen, QrCode, Sparkles 
@@ -11,6 +12,7 @@ export const DashboardView: React.FC<{
   onOpenAddCustomer: () => void;
 }> = ({ onOpenNewSale, onOpenReceivePayment, onOpenAddCustomer }) => {
   const { customers, sales, payments, ledgerEntries, shop, setActiveTab } = useAppStore();
+  const [showUpiQrModal, setShowUpiQrModal] = useState(false);
 
   const totalOutstanding = customers.reduce((sum, c) => {
     const custLedger = ledgerEntries.filter(l => l.customer_id === c.id);
@@ -53,7 +55,7 @@ export const DashboardView: React.FC<{
             </p>
           </div>
           <button
-            onClick={() => alert(`Shop UPI QR Code for ${shop?.name}\nUPI URI: upi://pay?pa=${shop?.upi_id}&pn=${encodeURIComponent(shop?.name || '')}`)}
+            onClick={() => setShowUpiQrModal(true)}
             style={{
               background: 'white',
               color: 'var(--khatta-800)',
@@ -189,6 +191,8 @@ export const DashboardView: React.FC<{
           ))}
         </div>
       </div>
+
+      {showUpiQrModal && <UpiQrModal onClose={() => setShowUpiQrModal(false)} />}
     </div>
   );
 };

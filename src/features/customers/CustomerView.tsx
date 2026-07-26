@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import type { Customer } from '../../types';
 import { EditCustomerModal } from './EditCustomerModal';
+import { UpiQrModal } from '../../components/common/UpiQrModal';
 import { downloadSingleCustomerPDF, downloadAllCustomersSummaryPDF } from '../../services/pdfService';
 import { 
-  Search, Phone, MessageSquare, Plus, 
+  Search, Phone, MessageSquare, Plus, QrCode,
   MapPin, BookOpen, Send, Trash2, Pencil, Receipt, CreditCard, FileText
 } from 'lucide-react';
 
@@ -18,6 +19,7 @@ export const CustomerView: React.FC<{
   const [selectedTag, setSelectedTag] = useState<string>('ALL');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [qrCustomer, setQrCustomer] = useState<Customer | null>(null);
 
   const getCustomerBalance = (customerId: string) => {
     const custLedger = ledgerEntries.filter(l => l.customer_id === customerId);
@@ -257,6 +259,25 @@ export const CustomerView: React.FC<{
                   >
                     <Send size={18} />
                   </button>
+
+                  <button
+                    onClick={() => setQrCustomer(customer)}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: '12px',
+                      background: 'var(--khatta-50)',
+                      color: 'var(--khatta-600)',
+                      border: '1px solid var(--khatta-200)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer'
+                    }}
+                    title="Generate Dynamic UPI Payment QR Code"
+                  >
+                    <QrCode size={18} />
+                  </button>
                 </div>
               </div>
 
@@ -486,6 +507,14 @@ export const CustomerView: React.FC<{
         <EditCustomerModal
           customer={editingCustomer}
           onClose={() => setEditingCustomer(null)}
+        />
+      )}
+
+      {/* Dynamic UPI QR Modal */}
+      {qrCustomer && (
+        <UpiQrModal
+          selectedCustomer={qrCustomer}
+          onClose={() => setQrCustomer(null)}
         />
       )}
     </div>

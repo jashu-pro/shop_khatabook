@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import type { PaymentMethod } from '../../types';
-import { CheckCircle2, ArrowDownLeft, Send } from 'lucide-react';
+import { UpiQrModal } from '../../components/common/UpiQrModal';
+import { CheckCircle2, ArrowDownLeft, Send, QrCode } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const ReceivePaymentModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -12,6 +13,7 @@ export const ReceivePaymentModal: React.FC<{ onClose: () => void }> = ({ onClose
   const [referenceNo, setReferenceNo] = useState('');
   const [notes] = useState('');
   const [autoSendWhatsApp, setAutoSendWhatsApp] = useState<boolean>(true);
+  const [showQrModal, setShowQrModal] = useState<boolean>(false);
 
   const custLedger = ledgerEntries.filter(l => l.customer_id === selectedCustomerId);
   const currentBalance = custLedger.length > 0 ? custLedger[custLedger.length - 1].running_balance : 0;
@@ -154,6 +156,28 @@ export const ReceivePaymentModal: React.FC<{ onClose: () => void }> = ({ onClose
             </div>
           </div>
 
+          <button
+            type="button"
+            onClick={() => setShowQrModal(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              padding: '10px',
+              borderRadius: '12px',
+              background: 'var(--khatta-50)',
+              color: 'var(--khatta-700)',
+              border: '1.5px solid var(--khatta-500)',
+              fontWeight: 800,
+              fontSize: '13px',
+              cursor: 'pointer'
+            }}
+          >
+            <QrCode size={18} />
+            Show Live Dynamic UPI QR Scanner
+          </button>
+
           <div>
             <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: 4, display: 'block' }}>UPI Reference / UTR No. (Optional)</label>
             <input
@@ -182,6 +206,14 @@ export const ReceivePaymentModal: React.FC<{ onClose: () => void }> = ({ onClose
             Confirm Payment Received
           </button>
         </form>
+
+        {showQrModal && (
+          <UpiQrModal
+            selectedCustomer={customers.find(c => c.id === selectedCustomerId)}
+            initialAmount={parseFloat(amount || '0')}
+            onClose={() => setShowQrModal(false)}
+          />
+        )}
       </div>
     </div>
   );
