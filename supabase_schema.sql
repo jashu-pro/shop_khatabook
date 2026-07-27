@@ -7,24 +7,46 @@
 CREATE TABLE IF NOT EXISTS public.shops (
     id TEXT PRIMARY KEY,
     owner_id TEXT NOT NULL,
-    name TEXT NOT NULL,
-    logo_url TEXT,
-    category TEXT DEFAULT 'Kirana & General Store',
+    shop_name TEXT NOT NULL,
+    name TEXT,
+    shop_logo_url TEXT,
+    shop_logo_path TEXT,
+    owner_photo_url TEXT,
+    owner_photo_path TEXT,
+    business_category TEXT DEFAULT 'Grocery',
+    category TEXT DEFAULT 'Grocery',
+    door_number TEXT,
     door_no TEXT,
     street TEXT,
     area TEXT,
-    village_town TEXT NOT NULL,
+    village TEXT NOT NULL,
+    village_town TEXT,
     mandal TEXT,
     district TEXT NOT NULL,
     state TEXT NOT NULL,
+    pin_code TEXT,
     pincode TEXT,
+    country TEXT DEFAULT 'India',
+    gst TEXT,
     gstin TEXT,
     pan TEXT,
     upi_id TEXT,
+    business_email TEXT,
+    language TEXT DEFAULT 'English',
     currency TEXT DEFAULT 'INR',
+    theme TEXT DEFAULT 'Light',
+    payment_reminder BOOLEAN DEFAULT TRUE,
+    whatsapp_reminder BOOLEAN DEFAULT TRUE,
+    sms_reminder BOOLEAN DEFAULT FALSE,
+    ai_daily_summary BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- SUPABASE STORAGE BUCKETS FOR OWNER PHOTOS & SHOP LOGOS
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('owner-photos', 'owner-photos', true), ('shop-logos', 'shop-logos', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- 2. CUSTOMERS TABLE
 CREATE TABLE IF NOT EXISTS public.customers (

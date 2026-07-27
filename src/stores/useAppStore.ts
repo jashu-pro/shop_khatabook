@@ -120,20 +120,34 @@ interface AppState {
 const INITIAL_SHOP: Shop = {
   id: 'shop-1',
   owner_id: 'user-1',
+  shop_name: 'Sri Laxmi Traders',
   name: 'Sri Laxmi Traders',
-  category: 'Kirana & General Store',
+  business_category: 'Grocery',
+  category: 'Grocery',
+  door_number: 'D.No 4-12',
   door_no: 'D.No 4-12',
   street: 'Main Road',
   area: 'Clock Tower Center',
+  village: 'Anantapur',
   village_town: 'Anantapur',
   mandal: 'Anantapur Urban',
   district: 'Anantapur',
   state: 'Andhra Pradesh',
+  pin_code: '515001',
   pincode: '515001',
+  country: 'India',
+  gst: '37AAAAA0000A1Z5',
   gstin: '37AAAAA0000A1Z5',
   pan: 'ABCDE1234F',
   upi_id: 'srilaxmi@ybl',
+  business_email: 'srilaxmi.traders@gmail.com',
+  language: 'English',
   currency: 'INR',
+  theme: 'Light',
+  payment_reminder: true,
+  whatsapp_reminder: true,
+  sms_reminder: false,
+  ai_daily_summary: true,
   created_at: new Date().toISOString()
 };
 
@@ -448,27 +462,52 @@ export const useAppStore = create<AppState>()(
       // Shop State (Phase 2)
       shop: INITIAL_SHOP,
       shopUsers: INITIAL_SHOP_USERS,
-      createShop: (shopData: Partial<Shop>) => set((state: AppState) => ({
-        shop: {
+      createShop: (shopData: Partial<Shop>) => set((state: AppState) => {
+        const sName = shopData.shop_name || shopData.name || 'My New Store';
+        const sCat = shopData.business_category || shopData.category || 'Grocery';
+        const sVillage = shopData.village || shopData.village_town || 'Local Town';
+        const sPincode = shopData.pin_code || shopData.pincode || '515001';
+        const sGst = shopData.gst || shopData.gstin || '';
+        const sDoor = shopData.door_number || shopData.door_no || '';
+
+        const newShop: Shop = {
           id: 'shop-' + Date.now(),
           owner_id: state.user?.id || 'user-1',
-          name: shopData.name || 'My New Shop',
-          category: shopData.category || 'Kirana & General Store',
-          door_no: shopData.door_no || '',
+          shop_name: sName,
+          name: sName,
+          business_category: sCat,
+          category: sCat,
+          door_number: sDoor,
+          door_no: sDoor,
           street: shopData.street || '',
           area: shopData.area || '',
-          village_town: shopData.village_town || 'Local Town',
+          village: sVillage,
+          village_town: sVillage,
           mandal: shopData.mandal || '',
           district: shopData.district || 'District',
           state: shopData.state || 'Andhra Pradesh',
-          pincode: shopData.pincode || '515001',
-          gstin: shopData.gstin || '',
+          pin_code: sPincode,
+          pincode: sPincode,
+          country: shopData.country || 'India',
+          gst: sGst,
+          gstin: sGst,
           pan: shopData.pan || '',
           upi_id: shopData.upi_id || 'myshop@upi',
-          currency: 'INR',
+          business_email: shopData.business_email || '',
+          language: shopData.language || 'English',
+          currency: shopData.currency || 'INR',
+          theme: shopData.theme || 'Light',
+          payment_reminder: shopData.payment_reminder !== undefined ? shopData.payment_reminder : true,
+          whatsapp_reminder: shopData.whatsapp_reminder !== undefined ? shopData.whatsapp_reminder : true,
+          sms_reminder: shopData.sms_reminder !== undefined ? shopData.sms_reminder : false,
+          ai_daily_summary: shopData.ai_daily_summary !== undefined ? shopData.ai_daily_summary : true,
+          shop_logo_url: shopData.shop_logo_url || undefined,
+          owner_photo_url: shopData.owner_photo_url || undefined,
           created_at: new Date().toISOString()
-        }
-      })),
+        };
+
+        return { shop: newShop };
+      }),
       updateShop: (updated: Partial<Shop>) => set((state: AppState) => ({ shop: state.shop ? { ...state.shop, ...updated } : null })),
       clearShop: () => set({ shop: null }),
       addShopUser: (user: Omit<ShopUser, 'id' | 'created_at'>) => set((state: AppState) => ({

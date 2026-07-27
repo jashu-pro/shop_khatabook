@@ -185,11 +185,11 @@ export const SettingsView: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'var(--khatta-600)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '22px' }}>
-              {shop?.name.charAt(0)}
+              {(shop?.shop_name || shop?.name || 'S').charAt(0)}
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <h3 style={{ fontSize: '17px' }}>{shop?.name}</h3>
+                <h3 style={{ fontSize: '17px' }}>{shop?.shop_name || shop?.name || 'Sri Laxmi Traders'}</h3>
                 <span style={{ background: 'var(--khatta-50)', color: 'var(--khatta-700)', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 700 }}>
                   Registered
                 </span>
