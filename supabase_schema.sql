@@ -165,6 +165,20 @@ INSERT INTO public.shops (id, owner_id, name, category, village_town, district, 
 VALUES ('shop-1', 'user-1', 'Sri Laxmi Traders', 'Kirana & General Store', 'Anantapur', 'Anantapur', 'Andhra Pradesh', '515001', 'srilaxmi@ybl')
 ON CONFLICT (id) DO NOTHING;
 
+-- 9. USER PROFILES TABLE
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    phone TEXT,
+    avatar_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow anon read/write profiles" ON public.profiles FOR ALL USING (true);
+
 INSERT INTO public.customers (id, shop_id, name, phone, village, credit_limit, credit_score)
 VALUES 
   ('cust-1', 'shop-1', 'Venkatesh Rao', '9440112345', 'Tadipatri', 50000, 820),
