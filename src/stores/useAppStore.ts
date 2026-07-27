@@ -24,10 +24,15 @@ interface AppState {
   // Auth State & PIN Lock (Phase 1)
   user: UserProfile | null;
   isAuthenticated: boolean;
+  authToken: string | null;
+  refreshToken: string | null;
   isPinEnabled: boolean;
   securityPin: string;
   isLocked: boolean;
   login: (phone: string, fullName?: string) => void;
+  signup: (data: { fullName: string; phone: string; email?: string; shopName: string; category?: string }) => void;
+  loginWithGoogle: () => void;
+  forgotPasswordReset: (phoneOrEmail: string, newPin: string) => boolean;
   logout: () => void;
   setPinLock: (enabled: boolean, pin?: string) => void;
   lockApp: () => void;
@@ -377,14 +382,49 @@ export const useAppStore = create<AppState>()(
         created_at: new Date().toISOString()
       },
       isAuthenticated: true,
+      authToken: 'jwt_token_demo_987654321',
+      refreshToken: 'refresh_token_demo_123456789',
       isPinEnabled: false,
       securityPin: '1234',
       isLocked: false,
       login: (phone: string, fullName?: string) => set({
         isAuthenticated: true,
+        authToken: 'jwt_token_' + Date.now(),
+        refreshToken: 'refresh_token_' + Date.now(),
         user: { id: 'user-' + Date.now(), full_name: fullName || 'Shop Owner', phone, created_at: new Date().toISOString() }
       }),
-      logout: () => set({ isAuthenticated: false, user: null, isLocked: false }),
+      signup: (data) => {
+        const newUser: UserProfile = {
+          id: 'user-' + Date.now(),
+          full_name: data.fullName,
+          phone: data.phone,
+          created_at: new Date().toISOString()
+        };
+        set((state: AppState) => ({
+          isAuthenticated: true,
+          authToken: 'jwt_token_' + Date.now(),
+          refreshToken: 'refresh_token_' + Date.now(),
+          user: newUser,
+          shop: state.shop ? { ...state.shop, name: data.shopName, category: data.category || state.shop.category } : state.shop
+        }));
+      },
+      loginWithGoogle: () => set({
+        isAuthenticated: true,
+        authToken: 'google_oauth_token_' + Date.now(),
+        refreshToken: 'google_refresh_token_' + Date.now(),
+        user: {
+          id: 'user-google-1',
+          full_name: 'Jaswanth (Google Account)',
+          phone: '+91 98765 43210',
+          avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          created_at: new Date().toISOString()
+        }
+      }),
+      forgotPasswordReset: (_phoneOrEmail: string, newPin: string) => {
+        set({ securityPin: newPin, isPinEnabled: true });
+        return true;
+      },
+      logout: () => set({ isAuthenticated: false, user: null, authToken: null, refreshToken: null, isLocked: false }),
       setPinLock: (enabled: boolean, pin?: string) => set((state: AppState) => ({
         isPinEnabled: enabled,
         securityPin: pin !== undefined ? pin : state.securityPin

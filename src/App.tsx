@@ -14,25 +14,31 @@ import { ReceivePaymentModal } from './features/payments/ReceivePaymentModal';
 import { AddCustomerModal } from './features/customers/AddCustomerModal';
 import { AuthModal } from './features/auth/AuthModal';
 import { PinLockScreen } from './features/auth/PinLockScreen';
+import { SplashScreen } from './components/common/SplashScreen';
 import { isSupabaseConfigured, fetchCloudDataToLocal } from './services/supabase';
 
 export function App() {
-  const { activeTab, setCloudData, clearAllData, isAuthenticated, isPinEnabled, isLocked } = useAppStore();
+  const { activeTab, setCloudData, clearAllData, isAuthenticated, isPinEnabled, isLocked, theme } = useAppStore();
 
+  const [showSplash, setShowSplash] = useState(true);
   const [saleCustomerId, setSaleCustomerId] = useState<string | null>(null);
   const [paymentCustomerId, setPaymentCustomerId] = useState<string | null>(null);
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
 
+  // Synchronize theme attribute on mount & theme change
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  // Initial Boot Cloud & Local Sync
   useEffect(() => {
     const syncOnAppLoad = async () => {
       if (isSupabaseConfigured()) {
         const res = await fetchCloudDataToLocal();
         if (res.success && res.data) {
           if (res.isEmpty) {
-            // Supabase database was cleared/cleaned by user -> clear local store so UI is cleared
             clearAllData();
           } else {
-            // Supabase has records -> sync down to local state
             setCloudData(res.data);
           }
         }
@@ -87,40 +93,44 @@ export function App() {
   };
 
   return (
-    <div className="app-viewport">
-      <DesktopSidebar onOpenNewSale={() => handleOpenNewSale()} />
+    <>
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
-      <div className="mobile-wrapper">
-        <HeaderBar />
+      <div className="app-viewport">
+        <DesktopSidebar onOpenNewSale={() => handleOpenNewSale()} />
 
-        <main className="main-content">
-          {renderTabContent()}
-        </main>
+        <div className="mobile-wrapper">
+          <HeaderBar />
 
-        <BottomTabBar onOpenNewSale={() => handleOpenNewSale()} />
+          <main className="main-content">
+            {renderTabContent()}
+          </main>
 
-        {saleCustomerId !== null && (
-          <NewSaleModal
-            initialCustomerId={saleCustomerId}
-            onClose={() => setSaleCustomerId(null)}
-          />
-        )}
-        {paymentCustomerId !== null && (
-          <ReceivePaymentModal
-            initialCustomerId={paymentCustomerId}
-            onClose={() => setPaymentCustomerId(null)}
-          />
-        )}
-        {showAddCustomerModal && (
-          <AddCustomerModal
-            onClose={() => setShowAddCustomerModal(false)}
-          />
-        )}
+          <BottomTabBar onOpenNewSale={() => handleOpenNewSale()} />
+
+          {saleCustomerId !== null && (
+            <NewSaleModal
+              initialCustomerId={saleCustomerId}
+              onClose={() => setSaleCustomerId(null)}
+            />
+          )}
+          {paymentCustomerId !== null && (
+            <ReceivePaymentModal
+              initialCustomerId={paymentCustomerId}
+              onClose={() => setPaymentCustomerId(null)}
+            />
+          )}
+          {showAddCustomerModal && (
+            <AddCustomerModal
+              onClose={() => setShowAddCustomerModal(false)}
+            />
+          )}
+        </div>
+
+        {!isAuthenticated && <AuthModal />}
+        {isAuthenticated && isPinEnabled && isLocked && <PinLockScreen />}
       </div>
-
-      {!isAuthenticated && <AuthModal />}
-      {isPinEnabled && isLocked && <PinLockScreen />}
-    </div>
+    </>
   );
 }
 
