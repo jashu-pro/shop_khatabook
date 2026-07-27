@@ -377,15 +377,10 @@ export const useAppStore = create<AppState>()(
       toggleSimulatorMode: () => set((state: AppState) => ({ isSimulatorMode: !state.isSimulatorMode })),
 
       // Auth State & PIN Lock (Phase 1)
-      user: {
-        id: 'user-1',
-        full_name: 'Jaswanth Kumar',
-        phone: '+91 98765 43210',
-        created_at: new Date().toISOString()
-      },
-      isAuthenticated: true,
-      authToken: 'jwt_token_demo_987654321',
-      refreshToken: 'refresh_token_demo_123456789',
+      user: null,
+      isAuthenticated: false,
+      authToken: null,
+      refreshToken: null,
       isPinEnabled: false,
       securityPin: '1234',
       isLocked: false,
@@ -428,8 +423,10 @@ export const useAppStore = create<AppState>()(
         return true;
       },
       logout: () => set({ 
-        isAuthenticated: true, 
-        user: { id: 'user-1', full_name: 'Jaswanth Kumar', phone: '+91 98765 43210', created_at: new Date().toISOString() },
+        isAuthenticated: false, 
+        user: null, 
+        authToken: null, 
+        refreshToken: null, 
         isLocked: false 
       }),
       setPinLock: (enabled: boolean, pin?: string) => set((state: AppState) => ({
