@@ -1,6 +1,6 @@
 // Supabase Service Integration with automatic LocalStorage Fallback & Background Cloud Sync
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { Customer, Product, Sale, Payment, LedgerEntry } from '../types';
+import type { Customer, Product, Sale, Payment, LedgerEntry, Category } from '../types';
 
 const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || '';
@@ -283,6 +283,167 @@ export const syncAllLocalDataToCloud = async () => {
   }
 };
 
+// Function to fetch all Cloud Data from Supabase and sync to local state
+export const fetchCloudDataToLocal = async () => {
+  if (!supabase) return { success: false, message: 'Supabase is not configured', isEmpty: false };
+
+  try {
+    // 1. Fetch Customers
+    const { data: dbCustomers, error: custErr } = await supabase
+      .from('customers')
+      .select('*')
+      .or('is_deleted.eq.false,is_deleted.is.null');
+
+    if (custErr) throw custErr;
+
+    // 2. Fetch Products
+    const { data: dbProducts, error: prodErr } = await supabase.from('products').select('*');
+    if (prodErr) throw prodErr;
+
+    // 3. Fetch Sales & Sale Items
+    const { data: dbSales, error: saleErr } = await supabase.from('sales').select('*').order('created_at', { ascending: false });
+    if (saleErr) throw saleErr;
+
+    const { data: dbItems, error: itemsErr } = await supabase.from('sale_items').select('*');
+    if (itemsErr) console.warn('Sale items fetch warning:', itemsErr.message);
+
+    // Map items to sales
+    const sales: Sale[] = (dbSales || []).map((s: any) => ({
+      ...s,
+      items: (dbItems || [])
+        .filter((i: any) => i.sale_id === s.id)
+        .map((i: any) => ({
+          id: i.id,
+          sale_id: i.sale_id,
+          product_id: i.product_id || undefined,
+          item_name: i.item_name,
+          quantity: Number(i.quantity) || 1,
+          unit_price: Number(i.unit_price) || 0,
+          total_price: Number(i.total_price) || 0
+        }))
+    }));
+
+    // 4. Fetch Payments
+    const { data: dbPayments, error: payErr } = await supabase.from('payments').select('*').order('created_at', { ascending: false });
+    if (payErr) throw payErr;
+
+    // 5. Fetch Ledger Entries
+    const { data: dbLedger, error: ledErr } = await supabase.from('ledger_entries').select('*').order('entry_date', { ascending: true });
+    if (ledErr) throw ledErr;
+
+    // 6. Fetch Categories
+    const { data: dbCategories, error: catErr } = await supabase.from('categories').select('*');
+    if (catErr) console.warn('Categories fetch warning:', catErr.message);
+
+    const customers: Customer[] = (dbCustomers || []).map((c: any) => ({
+      id: c.id,
+      shop_id: c.shop_id || 'shop-1',
+      name: c.name,
+      phone: c.phone,
+      photo_url: c.photo_url || undefined,
+      village: c.village || 'Local',
+      address: c.address || undefined,
+      notes: c.notes || undefined,
+      tags: c.tags || ['Regular'],
+      credit_limit: Number(c.credit_limit) || 50000,
+      credit_score: Number(c.credit_score) || 750,
+      last_payment_date: c.last_payment_date || undefined,
+      is_deleted: c.is_deleted || false,
+      created_at: c.created_at || new Date().toISOString()
+    }));
+
+    const products: Product[] = (dbProducts || []).map((p: any) => ({
+      id: p.id,
+      shop_id: p.shop_id || 'shop-1',
+      category_id: p.category_id || undefined,
+      category_name: p.category_name || undefined,
+      name: p.name,
+      barcode: p.barcode || undefined,
+      selling_price: Number(p.selling_price) || 0,
+      purchase_price: Number(p.purchase_price) || 0,
+      stock_quantity: Number(p.stock_quantity) || 0,
+      min_stock_alert: Number(p.min_stock_alert) || 5,
+      supplier_name: p.supplier_name || undefined,
+      created_at: p.created_at || new Date().toISOString()
+    }));
+
+    const payments: Payment[] = (dbPayments || []).map((p: any) => ({
+      id: p.id,
+      shop_id: p.shop_id || 'shop-1',
+      customer_id: p.customer_id,
+      customer_name: p.customer_name || undefined,
+      sale_id: p.sale_id || undefined,
+      amount: Number(p.amount) || 0,
+      method: p.method || 'CASH',
+      reference_no: p.reference_no || undefined,
+      bank_name: p.bank_name || undefined,
+      screenshot_url: p.screenshot_url || undefined,
+      notes: p.notes || undefined,
+      created_at: p.created_at || new Date().toISOString()
+    }));
+
+    const ledgerEntries: LedgerEntry[] = (dbLedger || []).map((l: any) => ({
+      id: l.id,
+      shop_id: l.shop_id || 'shop-1',
+      customer_id: l.customer_id,
+      customer_name: l.customer_name || undefined,
+      entry_type: l.entry_type,
+      sale_id: l.sale_id || undefined,
+      payment_id: l.payment_id || undefined,
+      debit: Number(l.debit) || 0,
+      credit: Number(l.credit) || 0,
+      running_balance: Number(l.running_balance) || 0,
+      description: l.description || undefined,
+      entry_date: l.entry_date || new Date().toISOString(),
+      created_at: l.created_at || new Date().toISOString()
+    }));
+
+    const categories: Category[] = (dbCategories || []).map((cat: any) => ({
+      id: cat.id,
+      shop_id: cat.shop_id || 'shop-1',
+      name: cat.name,
+      created_at: cat.created_at || new Date().toISOString()
+    }));
+
+    const totalRecords = customers.length + products.length + sales.length + payments.length + ledgerEntries.length;
+    const isEmpty = totalRecords === 0;
+
+    return {
+      success: true,
+      isEmpty,
+      data: {
+        customers,
+        products,
+        sales,
+        payments,
+        ledgerEntries,
+        categories
+      }
+    };
+  } catch (err: any) {
+    console.error('fetchCloudDataToLocal exception:', err);
+    return { success: false, message: err?.message || 'Cloud fetch failed', isEmpty: false };
+  }
+};
+
+// Function to wipe all data in Supabase Cloud DB tables
+export const clearAllSupabaseData = async () => {
+  if (!supabase) return { success: false, message: 'Supabase is not configured' };
+  try {
+    await supabase.from('ledger_entries').delete().neq('id', '0');
+    await supabase.from('sale_items').delete().neq('id', '0');
+    await supabase.from('sales').delete().neq('id', '0');
+    await supabase.from('payments').delete().neq('id', '0');
+    await supabase.from('products').delete().neq('id', '0');
+    await supabase.from('categories').delete().neq('id', '0');
+    await supabase.from('customers').delete().neq('id', '0');
+    return { success: true, message: 'All tables in Supabase Cloud DB cleared successfully!' };
+  } catch (err: any) {
+    console.error('clearAllSupabaseData exception:', err);
+    return { success: false, message: err?.message || 'Failed to clear Supabase' };
+  }
+};
+
 export const getStoragePersistenceInfo = () => {
   try {
     const rawData = localStorage.getItem('shop-khattabook-storage');
@@ -314,3 +475,4 @@ console.log(
     ? `Connected to Supabase Cloud DB (${supabaseUrl})` 
     : 'Operating in High-Performance Persistent Local Database Mode (LocalStorage Sync Active)'
 );
+

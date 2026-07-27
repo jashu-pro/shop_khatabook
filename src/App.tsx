@@ -12,18 +12,32 @@ import { SettingsView } from './features/settings/SettingsView';
 import { NewSaleModal } from './features/sales/NewSaleModal';
 import { ReceivePaymentModal } from './features/payments/ReceivePaymentModal';
 import { AddCustomerModal } from './features/customers/AddCustomerModal';
-import { syncAllLocalDataToCloud } from './services/supabase';
+import { isSupabaseConfigured, fetchCloudDataToLocal } from './services/supabase';
 
 export function App() {
-  const { activeTab } = useAppStore();
+  const { activeTab, setCloudData, clearAllData } = useAppStore();
 
   const [saleCustomerId, setSaleCustomerId] = useState<string | null>(null);
   const [paymentCustomerId, setPaymentCustomerId] = useState<string | null>(null);
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
 
   useEffect(() => {
-    syncAllLocalDataToCloud();
-  }, []);
+    const syncOnAppLoad = async () => {
+      if (isSupabaseConfigured()) {
+        const res = await fetchCloudDataToLocal();
+        if (res.success && res.data) {
+          if (res.isEmpty) {
+            // Supabase database was cleared/cleaned by user -> clear local store so UI is cleared
+            clearAllData();
+          } else {
+            // Supabase has records -> sync down to local state
+            setCloudData(res.data);
+          }
+        }
+      }
+    };
+    syncOnAppLoad();
+  }, [setCloudData, clearAllData]);
 
   const handleOpenNewSale = (cId?: string) => {
     setSaleCustomerId(cId || '');

@@ -85,10 +85,21 @@ interface AppState {
   processVoiceAICommand: (prompt: string) => AIRequestLog['parsed_result'];
   confirmAIAction: (log: AIRequestLog['parsed_result']) => void;
 
-  // Offline Sync Queue (Phase 10)
+  // Offline Sync Queue & Storage Management
   isOnline: boolean;
   pendingSyncCount: number;
   toggleNetworkStatus: () => void;
+
+  // Storage & Cloud Reset/Sync Actions
+  clearAllData: () => void;
+  setCloudData: (data: { 
+    customers?: Customer[]; 
+    products?: Product[]; 
+    sales?: Sale[]; 
+    payments?: Payment[]; 
+    ledgerEntries?: LedgerEntry[]; 
+    categories?: Category[];
+  }) => void;
 }
 
 const INITIAL_SHOP: Shop = {
@@ -689,10 +700,41 @@ export const useAppStore = create<AppState>()(
     }
   },
 
-  // Offline Engine
+  // Offline Engine & Storage Management
   isOnline: true,
   pendingSyncCount: 0,
-  toggleNetworkStatus: () => set((state: AppState) => ({ isOnline: !state.isOnline }))
+  toggleNetworkStatus: () => set((state: AppState) => ({ isOnline: !state.isOnline })),
+
+  // Storage & Cloud Reset/Sync Actions
+  clearAllData: () => {
+    set({
+      customers: [],
+      products: [],
+      sales: [],
+      payments: [],
+      ledgerEntries: [],
+      stockMovements: [],
+      notifications: [],
+      auditLogs: [],
+      aiRequests: []
+    });
+    try {
+      localStorage.removeItem('shop-khattabook-storage');
+    } catch (e) {
+      console.error('Failed to clear local storage', e);
+    }
+  },
+
+  setCloudData: (data) => {
+    set((state: AppState) => ({
+      customers: data.customers !== undefined ? data.customers : state.customers,
+      products: data.products !== undefined ? data.products : state.products,
+      sales: data.sales !== undefined ? data.sales : state.sales,
+      payments: data.payments !== undefined ? data.payments : state.payments,
+      ledgerEntries: data.ledgerEntries !== undefined ? data.ledgerEntries : state.ledgerEntries,
+      categories: data.categories !== undefined ? data.categories : state.categories
+    }));
+  }
     }),
     {
       name: 'shop-khattabook-storage',
