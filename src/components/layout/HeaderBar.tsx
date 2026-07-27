@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAppStore } from '../../stores/useAppStore';
-import { Sun, Moon, Wifi, WifiOff, Store, Sparkles } from 'lucide-react';
+import { Sun, Moon, Wifi, WifiOff, Store, Sparkles, Lock } from 'lucide-react';
 
 export const HeaderBar: React.FC = () => {
-  const { shop, theme, toggleTheme, isOnline, toggleNetworkStatus, setActiveTab } = useAppStore();
+  const { shop, theme, toggleTheme, isOnline, toggleNetworkStatus, setActiveTab, isPinEnabled, lockApp } = useAppStore();
 
   const statusBg = isOnline ? 'var(--khatta-50)' : 'var(--debt-50)';
   const statusColor = isOnline ? 'var(--khatta-600)' : 'var(--debt-600)';
@@ -64,6 +64,27 @@ export const HeaderBar: React.FC = () => {
         >
           <Sparkles size={16} />
         </button>
+
+        {isPinEnabled && (
+          <button
+            onClick={lockApp}
+            title="Lock App with PIN"
+            style={{
+              background: 'var(--debt-50)',
+              color: 'var(--debt-600)',
+              border: '1px solid var(--debt-200)',
+              width: 34,
+              height: 34,
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <Lock size={15} />
+          </button>
+        )}
 
         <button
           onClick={toggleTheme}

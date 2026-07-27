@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import type { UserRole, ShopUser } from '../../types';
-import { UserPlus, Moon, Sun, Database, RefreshCw, UploadCloud, Trash2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { 
+  UserPlus, Moon, Sun, Database, RefreshCw, UploadCloud, Trash2, 
+  CheckCircle2, AlertTriangle, QrCode, Lock, Key, LogOut, Edit3, Shield, UserX 
+} from 'lucide-react';
 import { 
   isSupabaseConfigured, 
   fetchCloudDataToLocal, 
   syncAllLocalDataToCloud, 
   clearAllSupabaseData
 } from '../../services/supabase';
+import { EditShopModal } from './EditShopModal';
+import { UpiQrPosterModal } from './UpiQrPosterModal';
 
 export const SettingsView: React.FC = () => {
   const { 
     shop, 
     shopUsers, 
     addShopUser, 
+    removeShopUser,
     theme, 
     toggleTheme, 
     user,
+    logout,
+    isPinEnabled,
+    securityPin,
+    setPinLock,
+    lockApp,
     customers,
     products,
     sales,
@@ -29,6 +40,12 @@ export const SettingsView: React.FC = () => {
   const [newUserName, setNewUserName] = useState('');
   const [newUserPhone, setNewUserPhone] = useState('');
   const [newUserRole, setNewUserRole] = useState<UserRole>('cashier');
+
+  // Modals for Phase 1 & 2
+  const [showEditShopModal, setShowEditShopModal] = useState(false);
+  const [showQrPosterModal, setShowQrPosterModal] = useState(false);
+  const [showPinConfigModal, setShowPinConfigModal] = useState(false);
+  const [newPinInput, setNewPinInput] = useState(securityPin || '1234');
 
   // Storage state management modal & notifications
   const [showClearStorageModal, setShowClearStorageModal] = useState(false);
@@ -52,6 +69,15 @@ export const SettingsView: React.FC = () => {
     setShowAddUserModal(false);
     setNewUserName('');
     setNewUserPhone('');
+  };
+
+  const handleSavePin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPinInput.length === 4) {
+      setPinLock(true, newPinInput);
+      setShowPinConfigModal(false);
+      setSyncStatusMsg({ type: 'success', text: `Security PIN successfully set to ${newPinInput}` });
+    }
   };
 
   const handlePullFromSupabase = async () => {
@@ -126,12 +152,12 @@ export const SettingsView: React.FC = () => {
   };
 
   return (
-    <div>
+    <div style={{ paddingBottom: '30px' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <h2>Shop Settings & Storage</h2>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Database Sync, Storage Management & Team Roles</p>
+          <h2>Settings & Management</h2>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Phase 1 & Phase 2 • Auth, Security PIN, Store Details & Roles</p>
         </div>
       </div>
 
@@ -154,8 +180,164 @@ export const SettingsView: React.FC = () => {
         </div>
       )}
 
+      {/* Phase 2: Shop Details Card */}
+      <div style={{ background: 'var(--bg-card)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'var(--khatta-600)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '22px' }}>
+              {shop?.name.charAt(0)}
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <h3 style={{ fontSize: '17px' }}>{shop?.name}</h3>
+                <span style={{ background: 'var(--khatta-50)', color: 'var(--khatta-700)', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 700 }}>
+                  Registered
+                </span>
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: 2 }}>{shop?.category} • GSTIN: {shop?.gstin || 'N/A'}</p>
+            </div>
+          </div>
+
+          <button className="btn-secondary" onClick={() => setShowEditShopModal(true)} style={{ width: 'auto', padding: '6px 12px', fontSize: '12px' }}>
+            <Edit3 size={14} />
+            <span>Edit Store Details</span>
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '12px', color: 'var(--text-main)', background: 'var(--border-subtle)', padding: '12px', borderRadius: '12px' }}>
+          <div><strong>Address:</strong> {shop?.door_no}, {shop?.street}, {shop?.village_town}, {shop?.district}, {shop?.state} - {shop?.pincode}</div>
+          <div><strong>UPI ID:</strong> {shop?.upi_id}</div>
+          <div><strong>Owner Contact:</strong> {user?.full_name} ({user?.phone})</div>
+        </div>
+
+        {/* UPI QR Poster Quick Button */}
+        <button
+          onClick={() => setShowQrPosterModal(true)}
+          style={{
+            width: '100%',
+            marginTop: 12,
+            padding: '10px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, #059669, #047857)',
+            color: 'white',
+            border: 'none',
+            fontSize: '13px',
+            fontWeight: 800,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            cursor: 'pointer'
+          }}
+        >
+          <QrCode size={16} />
+          <span>View & Print Official Shop UPI QR Poster</span>
+        </button>
+      </div>
+
+      {/* Phase 1: Security PIN & App Lock Section */}
+      <div style={{ background: 'var(--bg-card)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 38, height: 38, borderRadius: '10px', background: isPinEnabled ? 'var(--khatta-100)' : 'var(--border-subtle)', color: isPinEnabled ? 'var(--khatta-700)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Shield size={20} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '15px' }}>App Security & 4-Digit PIN Lock</h3>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                {isPinEnabled ? `PIN Protection Active (PIN: ${securityPin})` : 'PIN Lock is currently Disabled'}
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                setPinLock(!isPinEnabled);
+                setSyncStatusMsg({ type: 'success', text: !isPinEnabled ? 'PIN Lock Security Enabled!' : 'PIN Lock Security Disabled.' });
+              }}
+              style={{ width: 'auto', padding: '6px 12px', fontSize: '12px' }}
+            >
+              {isPinEnabled ? 'Disable PIN' : 'Enable PIN'}
+            </button>
+
+            {isPinEnabled && (
+              <button
+                className="btn-primary"
+                onClick={lockApp}
+                style={{ width: 'auto', padding: '6px 12px', fontSize: '12px', background: 'var(--debt-600)' }}
+              >
+                <Lock size={14} />
+                <span>Lock App Now</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {isPinEnabled && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--border-subtle)', padding: '10px 12px', borderRadius: '10px', fontSize: '12px' }}>
+            <span>Security PIN: <strong>{securityPin}</strong></span>
+            <button
+              onClick={() => setShowPinConfigModal(true)}
+              style={{ border: 'none', background: 'none', color: 'var(--khatta-600)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+            >
+              <Key size={13} />
+              <span>Change PIN</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Phase 2: Staff & Multi-User Roles */}
+      <div style={{ background: 'var(--bg-card)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div>
+            <h3 style={{ fontSize: '15px' }}>Staff & User Roles</h3>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Owner, Manager, Cashier, Accountant</p>
+          </div>
+          <button className="btn-primary" onClick={() => setShowAddUserModal(true)} style={{ width: 'auto', padding: '6px 12px', borderRadius: '8px', fontSize: '12px' }}>
+            <UserPlus size={14} />
+            + Add Staff
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {shopUsers.map((su: ShopUser) => {
+            const roleColor = 
+              su.role === 'owner' ? { bg: 'var(--khatta-50)', text: 'var(--khatta-700)' } :
+              su.role === 'manager' ? { bg: '#e0f2fe', text: '#0369a1' } :
+              su.role === 'cashier' ? { bg: '#fef3c7', text: '#b45309' } :
+              { bg: '#f3e8ff', text: '#6b21a8' };
+
+            return (
+              <div key={su.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '10px', background: 'var(--border-subtle)' }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '13px' }}>{su.user_name}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{su.user_phone}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ background: roleColor.bg, color: roleColor.text, padding: '3px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 800, textTransform: 'capitalize' }}>
+                    {su.role}
+                  </span>
+                  {su.role !== 'owner' && (
+                    <button
+                      onClick={() => removeShopUser(su.id)}
+                      title="Remove Staff"
+                      style={{ border: 'none', background: 'none', color: 'var(--debt-600)', cursor: 'pointer' }}
+                    >
+                      <UserX size={15} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Storage & Database Control Card */}
-      <div style={{ background: 'var(--bg-card)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-light)', marginBottom: 16 }}>
+      <div style={{ background: 'var(--bg-card)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)', marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 38, height: 38, borderRadius: '10px', background: isSupabaseConfigured() ? 'var(--khatta-100)' : 'var(--border-subtle)', color: 'var(--khatta-700)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -248,69 +430,8 @@ export const SettingsView: React.FC = () => {
         </div>
       </div>
 
-      {/* Shop Info Card */}
-      <div style={{ background: 'var(--bg-card)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-light)', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: '12px', background: 'var(--khatta-600)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '20px' }}>
-            {shop?.name.charAt(0)}
-          </div>
-          <div>
-            <h3 style={{ fontSize: '16px' }}>{shop?.name}</h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{shop?.category} • GSTIN: {shop?.gstin || 'N/A'}</p>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '12px', color: 'var(--text-main)', background: 'var(--border-subtle)', padding: '10px 12px', borderRadius: '10px' }}>
-          <div><strong>Address:</strong> {shop?.door_no}, {shop?.street}, {shop?.village_town}, {shop?.district}, {shop?.state} - {shop?.pincode}</div>
-          <div><strong>Shop UPI ID:</strong> {shop?.upi_id}</div>
-          <div><strong>Owner:</strong> {user?.full_name} ({user?.phone})</div>
-        </div>
-      </div>
-
-      {/* SaaS Subscription Status Card */}
-      <div style={{ background: 'linear-gradient(135deg, #059669, #047857)', color: 'white', borderRadius: '16px', padding: '16px', marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <span style={{ fontSize: '11px', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '9999px', fontWeight: 700 }}>
-              SaaS Pro Plan
-            </span>
-            <h3 style={{ color: 'white', fontSize: '16px', marginTop: 4 }}>Credora Unlimited Pro</h3>
-            <p style={{ fontSize: '12px', opacity: 0.9 }}>Multi-User, WhatsApp Reminders & AI Enabled</p>
-          </div>
-          <div style={{ fontSize: '14px', fontWeight: 800 }}>Active</div>
-        </div>
-      </div>
-
-      {/* Multi-User Shop Users (shop_users) */}
-      <div style={{ background: 'var(--bg-card)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-light)', marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div>
-            <h3 style={{ fontSize: '15px' }}>Staff & User Roles</h3>
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Owner, Manager, Cashier, Accountant</p>
-          </div>
-          <button className="btn-primary" onClick={() => setShowAddUserModal(true)} style={{ width: 'auto', padding: '6px 12px', borderRadius: '8px', fontSize: '12px' }}>
-            <UserPlus size={14} />
-            + Add Staff
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {shopUsers.map((su: ShopUser) => (
-            <div key={su.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '10px', background: 'var(--border-subtle)' }}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: '13px' }}>{su.user_name}</div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{su.user_phone}</div>
-              </div>
-              <span style={{ background: 'var(--khatta-50)', color: 'var(--khatta-700)', padding: '3px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 800, textTransform: 'capitalize' }}>
-                {su.role}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Theme Switcher */}
-      <div style={{ background: 'var(--bg-card)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Session & Theme Section */}
+      <div style={{ background: 'var(--bg-card)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <h3 style={{ fontSize: '14px' }}>Appearance Theme</h3>
           <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Switch between Dark & Light Mode</p>
@@ -320,6 +441,68 @@ export const SettingsView: React.FC = () => {
           <span style={{ marginLeft: 6 }}>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
         </button>
       </div>
+
+      {/* Logout Action Card */}
+      <div style={{ background: 'var(--bg-card)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h3 style={{ fontSize: '14px', color: 'var(--debt-600)' }}>Account Session</h3>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Logged in as {user?.full_name} ({user?.phone})</p>
+        </div>
+        <button
+          onClick={logout}
+          style={{
+            background: 'var(--debt-50)',
+            color: 'var(--debt-600)',
+            border: '1px solid var(--debt-200)',
+            padding: '8px 16px',
+            borderRadius: '10px',
+            fontSize: '12px',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            cursor: 'pointer'
+          }}
+        >
+          <LogOut size={15} />
+          <span>Log Out</span>
+        </button>
+      </div>
+
+      {/* Modals */}
+      {showEditShopModal && <EditShopModal onClose={() => setShowEditShopModal(false)} />}
+      {showQrPosterModal && <UpiQrPosterModal onClose={() => setShowQrPosterModal(false)} />}
+
+      {/* Change PIN Modal */}
+      {showPinConfigModal && (
+        <div className="modal-overlay" onClick={() => setShowPinConfigModal(false)}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '380px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2>Change 4-Digit Security PIN</h2>
+              <button onClick={() => setShowPinConfigModal(false)} style={{ border: 'none', background: 'none', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+            </div>
+
+            <form onSubmit={handleSavePin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700 }}>New 4-Digit Security PIN *</label>
+                <input
+                  type="text"
+                  maxLength={4}
+                  className="input-field"
+                  style={{ textAlign: 'center', fontSize: '22px', fontWeight: 800, letterSpacing: '4px' }}
+                  value={newPinInput}
+                  onChange={(e) => setNewPinInput(e.target.value.replace(/\D/g, ''))}
+                  required
+                />
+              </div>
+
+              <button type="submit" className="btn-primary" style={{ justifyContent: 'center' }}>
+                Save Security PIN
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Add Staff Modal */}
       {showAddUserModal && (

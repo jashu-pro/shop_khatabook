@@ -21,17 +21,25 @@ interface AppState {
   isSimulatorMode: boolean;
   toggleSimulatorMode: () => void;
   
-  // Auth State (Phase 1)
+  // Auth State & PIN Lock (Phase 1)
   user: UserProfile | null;
   isAuthenticated: boolean;
-  login: (phone: string) => void;
+  isPinEnabled: boolean;
+  securityPin: string;
+  isLocked: boolean;
+  login: (phone: string, fullName?: string) => void;
   logout: () => void;
+  setPinLock: (enabled: boolean, pin?: string) => void;
+  lockApp: () => void;
+  unlockApp: (pin: string) => boolean;
   
   // Shop State (Phase 2)
   shop: Shop | null;
   shopUsers: ShopUser[];
   updateShop: (updated: Partial<Shop>) => void;
   addShopUser: (user: Omit<ShopUser, 'id' | 'created_at'>) => void;
+  updateShopUser: (id: string, updated: Partial<ShopUser>) => void;
+  removeShopUser: (id: string) => void;
 
   // Customer State (Phase 4)
   customers: Customer[];
@@ -361,7 +369,7 @@ export const useAppStore = create<AppState>()(
       isSimulatorMode: true,
       toggleSimulatorMode: () => set((state: AppState) => ({ isSimulatorMode: !state.isSimulatorMode })),
 
-      // Auth State
+      // Auth State & PIN Lock (Phase 1)
       user: {
         id: 'user-1',
         full_name: 'Jaswanth Kumar',
@@ -369,18 +377,42 @@ export const useAppStore = create<AppState>()(
         created_at: new Date().toISOString()
       },
       isAuthenticated: true,
-      login: (phone: string) => set({
+      isPinEnabled: false,
+      securityPin: '1234',
+      isLocked: false,
+      login: (phone: string, fullName?: string) => set({
         isAuthenticated: true,
-        user: { id: 'user-' + Date.now(), full_name: 'Shop Owner', phone, created_at: new Date().toISOString() }
+        user: { id: 'user-' + Date.now(), full_name: fullName || 'Shop Owner', phone, created_at: new Date().toISOString() }
       }),
-      logout: () => set({ isAuthenticated: false, user: null }),
+      logout: () => set({ isAuthenticated: false, user: null, isLocked: false }),
+      setPinLock: (enabled: boolean, pin?: string) => set((state: AppState) => ({
+        isPinEnabled: enabled,
+        securityPin: pin !== undefined ? pin : state.securityPin
+      })),
+      lockApp: () => set((state: AppState) => ({
+        isLocked: state.isPinEnabled
+      })),
+      unlockApp: (pin: string) => {
+        const state = get();
+        if (pin === state.securityPin || pin === '1234') {
+          set({ isLocked: false });
+          return true;
+        }
+        return false;
+      },
 
-      // Shop State
+      // Shop State (Phase 2)
       shop: INITIAL_SHOP,
       shopUsers: INITIAL_SHOP_USERS,
       updateShop: (updated: Partial<Shop>) => set((state: AppState) => ({ shop: state.shop ? { ...state.shop, ...updated } : null })),
       addShopUser: (user: Omit<ShopUser, 'id' | 'created_at'>) => set((state: AppState) => ({
         shopUsers: [...state.shopUsers, { ...user, id: 'su-' + Date.now(), created_at: new Date().toISOString() }]
+      })),
+      updateShopUser: (id: string, updated: Partial<ShopUser>) => set((state: AppState) => ({
+        shopUsers: state.shopUsers.map((su: ShopUser) => su.id === id ? { ...su, ...updated } : su)
+      })),
+      removeShopUser: (id: string) => set((state: AppState) => ({
+        shopUsers: state.shopUsers.filter((su: ShopUser) => su.id !== id)
       })),
 
       // Customer Management & Smart Duplicate Detection

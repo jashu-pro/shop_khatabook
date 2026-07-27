@@ -12,10 +12,12 @@ import { SettingsView } from './features/settings/SettingsView';
 import { NewSaleModal } from './features/sales/NewSaleModal';
 import { ReceivePaymentModal } from './features/payments/ReceivePaymentModal';
 import { AddCustomerModal } from './features/customers/AddCustomerModal';
+import { AuthModal } from './features/auth/AuthModal';
+import { PinLockScreen } from './features/auth/PinLockScreen';
 import { isSupabaseConfigured, fetchCloudDataToLocal } from './services/supabase';
 
 export function App() {
-  const { activeTab, setCloudData, clearAllData } = useAppStore();
+  const { activeTab, setCloudData, clearAllData, isAuthenticated, isPinEnabled, isLocked } = useAppStore();
 
   const [saleCustomerId, setSaleCustomerId] = useState<string | null>(null);
   const [paymentCustomerId, setPaymentCustomerId] = useState<string | null>(null);
@@ -115,6 +117,9 @@ export function App() {
           />
         )}
       </div>
+
+      {!isAuthenticated && <AuthModal />}
+      {isPinEnabled && isLocked && <PinLockScreen />}
     </div>
   );
 }
