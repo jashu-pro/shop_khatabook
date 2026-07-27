@@ -31,7 +31,7 @@ interface AppState {
   isLocked: boolean;
   login: (phone: string, fullName?: string) => void;
   signup: (data: { fullName: string; phone: string; email?: string; shopName: string; category?: string }) => void;
-  loginWithGoogle: () => void;
+  loginWithGoogle: (isNewUser?: boolean) => void;
   forgotPasswordReset: (phoneOrEmail: string, newPin: string) => boolean;
   logout: () => void;
   setPinLock: (enabled: boolean, pin?: string) => void;
@@ -41,7 +41,9 @@ interface AppState {
   // Shop State (Phase 2)
   shop: Shop | null;
   shopUsers: ShopUser[];
+  createShop: (shopData: Partial<Shop>) => void;
   updateShop: (updated: Partial<Shop>) => void;
+  clearShop: () => void;
   addShopUser: (user: Omit<ShopUser, 'id' | 'created_at'>) => void;
   updateShopUser: (id: string, updated: Partial<ShopUser>) => void;
   removeShopUser: (id: string) => void;
@@ -408,18 +410,19 @@ export const useAppStore = create<AppState>()(
           shop: state.shop ? { ...state.shop, name: data.shopName, category: data.category || state.shop.category } : state.shop
         }));
       },
-      loginWithGoogle: () => set({
+      loginWithGoogle: (isNewUser?: boolean) => set((state: AppState) => ({
         isAuthenticated: true,
         authToken: 'google_oauth_token_' + Date.now(),
         refreshToken: 'google_refresh_token_' + Date.now(),
+        shop: isNewUser ? null : (state.shop || INITIAL_SHOP),
         user: {
-          id: 'user-google-1',
-          full_name: 'Jaswanth (Google Account)',
+          id: 'user-google-' + Date.now(),
+          full_name: isNewUser ? 'New Merchant (Gmail)' : 'Jaswanth (Google Account)',
           phone: '+91 98765 43210',
           avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
           created_at: new Date().toISOString()
         }
-      }),
+      })),
       forgotPasswordReset: (_phoneOrEmail: string, newPin: string) => {
         set({ securityPin: newPin, isPinEnabled: true });
         return true;
@@ -444,7 +447,29 @@ export const useAppStore = create<AppState>()(
       // Shop State (Phase 2)
       shop: INITIAL_SHOP,
       shopUsers: INITIAL_SHOP_USERS,
+      createShop: (shopData: Partial<Shop>) => set((state: AppState) => ({
+        shop: {
+          id: 'shop-' + Date.now(),
+          owner_id: state.user?.id || 'user-1',
+          name: shopData.name || 'My New Shop',
+          category: shopData.category || 'Kirana & General Store',
+          door_no: shopData.door_no || '',
+          street: shopData.street || '',
+          area: shopData.area || '',
+          village_town: shopData.village_town || 'Local Town',
+          mandal: shopData.mandal || '',
+          district: shopData.district || 'District',
+          state: shopData.state || 'Andhra Pradesh',
+          pincode: shopData.pincode || '515001',
+          gstin: shopData.gstin || '',
+          pan: shopData.pan || '',
+          upi_id: shopData.upi_id || 'myshop@upi',
+          currency: 'INR',
+          created_at: new Date().toISOString()
+        }
+      })),
       updateShop: (updated: Partial<Shop>) => set((state: AppState) => ({ shop: state.shop ? { ...state.shop, ...updated } : null })),
+      clearShop: () => set({ shop: null }),
       addShopUser: (user: Omit<ShopUser, 'id' | 'created_at'>) => set((state: AppState) => ({
         shopUsers: [...state.shopUsers, { ...user, id: 'su-' + Date.now(), created_at: new Date().toISOString() }]
       })),

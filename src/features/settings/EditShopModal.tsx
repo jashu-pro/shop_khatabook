@@ -3,7 +3,7 @@ import { useAppStore } from '../../stores/useAppStore';
 import { Store, MapPin, Building2, Save } from 'lucide-react';
 
 export const EditShopModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { shop, updateShop } = useAppStore();
+  const { shop, updateShop, createShop } = useAppStore();
 
   const [name, setName] = useState(shop?.name || '');
   const [category, setCategory] = useState(shop?.category || 'Kirana & General Store');
@@ -23,7 +23,7 @@ export const EditShopModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
     e.preventDefault();
     if (!name || !villageTown || !district) return;
 
-    updateShop({
+    const payload = {
       name,
       category,
       door_no: doorNo,
@@ -37,7 +37,13 @@ export const EditShopModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
       gstin,
       pan,
       upi_id: upiId
-    });
+    };
+
+    if (shop) {
+      updateShop(payload);
+    } else {
+      createShop(payload);
+    }
 
     onClose();
   };

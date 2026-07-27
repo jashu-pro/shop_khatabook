@@ -14,11 +14,12 @@ import { ReceivePaymentModal } from './features/payments/ReceivePaymentModal';
 import { AddCustomerModal } from './features/customers/AddCustomerModal';
 import { AuthModal } from './features/auth/AuthModal';
 import { PinLockScreen } from './features/auth/PinLockScreen';
+import { EditShopModal } from './features/settings/EditShopModal';
 import { SplashScreen } from './components/common/SplashScreen';
 import { isSupabaseConfigured, fetchCloudDataToLocal } from './services/supabase';
 
 export function App() {
-  const { activeTab, setCloudData, clearAllData, isAuthenticated, isPinEnabled, isLocked, theme } = useAppStore();
+  const { activeTab, setCloudData, clearAllData, isAuthenticated, shop, isPinEnabled, isLocked, theme } = useAppStore();
 
   const [showSplash, setShowSplash] = useState(true);
   const [saleCustomerId, setSaleCustomerId] = useState<string | null>(null);
@@ -128,7 +129,8 @@ export function App() {
         </div>
 
         {!isAuthenticated && <AuthModal />}
-        {isAuthenticated && isPinEnabled && isLocked && <PinLockScreen />}
+        {isAuthenticated && !shop && <EditShopModal onClose={() => {}} />}
+        {isAuthenticated && shop && isPinEnabled && isLocked && <PinLockScreen />}
       </div>
     </>
   );
