@@ -12,7 +12,6 @@ import { SettingsView } from './features/settings/SettingsView';
 import { NewSaleModal } from './features/sales/NewSaleModal';
 import { ReceivePaymentModal } from './features/payments/ReceivePaymentModal';
 import { AddCustomerModal } from './features/customers/AddCustomerModal';
-import { AuthModal } from './features/auth/AuthModal';
 import { PinLockScreen } from './features/auth/PinLockScreen';
 import { EditShopModal } from './features/settings/EditShopModal';
 import { SplashScreen } from './components/common/SplashScreen';
@@ -30,6 +29,22 @@ export function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Force isAuthenticated to true on app boot so login modal is completely removed
+  useEffect(() => {
+    const state = useAppStore.getState();
+    if (!state.isAuthenticated || !state.user) {
+      useAppStore.setState({
+        isAuthenticated: true,
+        user: state.user || {
+          id: 'user-1',
+          full_name: 'Jaswanth Kumar',
+          phone: '+91 98765 43210',
+          created_at: new Date().toISOString()
+        }
+      });
+    }
+  }, []);
 
   // Initial Boot Cloud & Local Sync
   useEffect(() => {
@@ -128,7 +143,6 @@ export function App() {
           )}
         </div>
 
-        {!isAuthenticated && <AuthModal />}
         {isAuthenticated && !shop && <EditShopModal onClose={() => {}} />}
         {isAuthenticated && shop && isPinEnabled && isLocked && <PinLockScreen />}
       </div>

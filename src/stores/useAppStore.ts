@@ -427,7 +427,11 @@ export const useAppStore = create<AppState>()(
         set({ securityPin: newPin, isPinEnabled: true });
         return true;
       },
-      logout: () => set({ isAuthenticated: false, user: null, authToken: null, refreshToken: null, isLocked: false }),
+      logout: () => set({ 
+        isAuthenticated: true, 
+        user: { id: 'user-1', full_name: 'Jaswanth Kumar', phone: '+91 98765 43210', created_at: new Date().toISOString() },
+        isLocked: false 
+      }),
       setPinLock: (enabled: boolean, pin?: string) => set((state: AppState) => ({
         isPinEnabled: enabled,
         securityPin: pin !== undefined ? pin : state.securityPin
