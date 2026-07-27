@@ -151,13 +151,28 @@ ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ledger_entries ENABLE ROW LEVEL SECURITY;
 
 -- ANONYMOUS/AUTHENTICATED ACCESS POLICIES FOR DEMO AND APP USE
+DROP POLICY IF EXISTS "Allow anon read/write shops" ON public.shops;
 CREATE POLICY "Allow anon read/write shops" ON public.shops FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow anon read/write customers" ON public.customers;
 CREATE POLICY "Allow anon read/write customers" ON public.customers FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow anon read/write categories" ON public.categories;
 CREATE POLICY "Allow anon read/write categories" ON public.categories FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow anon read/write products" ON public.products;
 CREATE POLICY "Allow anon read/write products" ON public.products FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow anon read/write sales" ON public.sales;
 CREATE POLICY "Allow anon read/write sales" ON public.sales FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow anon read/write sale_items" ON public.sale_items;
 CREATE POLICY "Allow anon read/write sale_items" ON public.sale_items FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow anon read/write payments" ON public.payments;
 CREATE POLICY "Allow anon read/write payments" ON public.payments FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow anon read/write ledger_entries" ON public.ledger_entries;
 CREATE POLICY "Allow anon read/write ledger_entries" ON public.ledger_entries FOR ALL USING (true);
 
 -- SEED INITIAL SHOP & CUSTOMER DATA
@@ -177,6 +192,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow anon read/write profiles" ON public.profiles;
 CREATE POLICY "Allow anon read/write profiles" ON public.profiles FOR ALL USING (true);
 
 INSERT INTO public.customers (id, shop_id, name, phone, village, credit_limit, credit_score)
